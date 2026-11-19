@@ -273,6 +273,21 @@ if(hasGsap&&!reduced){
   mm.add("(max-width: 900px)",()=>nativeStrip());
 } else nativeStrip();
 
+/* keyboard: bring focused frames into view (pinned strip + native strip) */
+stripFrames.addEventListener("focusin",e=>{
+  const f=e.target.closest(".frame"); if(!f) return;
+  const r=f.getBoundingClientRect();
+  if(r.left>=0 && r.right<=innerWidth) return;
+  const st=hasGsap ? ScrollTrigger.getAll().find(t=>t.trigger===$(".gallery") && t.pin) : null;
+  if(st && st.isActive){
+    const frac=(f.offsetLeft + f.offsetWidth/2) / strip.scrollWidth;
+    const target=st.start + frac*(st.end-st.start);
+    if(lenis) lenis.scrollTo(target,{duration:.6}); else window.scrollTo(0,target);
+  } else {
+    stripViewport.scrollTo({left:Math.max(0,f.offsetLeft-60),behavior:reduced?"auto":"smooth"});
+  }
+});
+
 /* ---------- lightbox ---------- */
 const lb=$("#lightbox"),lbImg=$("#lbImg"),lbCap=$("#lbCap");
 let lbItems=[],lbIndex=0,lbLastFocus=null;

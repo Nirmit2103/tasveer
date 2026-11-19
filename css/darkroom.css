@@ -6,7 +6,7 @@
 :root{
   --bg:#0B0A08; --bg2:#14110C; --bg3:#1C1812;
   --paper:#F4EEE2; --paper-dim:#E5DCC8;
-  --ink:#EDE6D6; --muted:#97907E; --dim:#5C5648;
+  --ink:#EDE6D6; --muted:#97907E; --dim:#857D6C;
   --red:#FF3D2E; --amber:#E8B04B;
   --line:rgba(237,230,214,.14); --line-soft:rgba(237,230,214,.07);
   --font-display:"Anton","Arial Narrow",sans-serif;
@@ -287,17 +287,17 @@ section{position:relative}
 .polaroid-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;filter:saturate(.94) contrast(1.05)}
 .polaroid-meta{padding:.8rem .3rem 1rem}
 .polaroid-name{font-family:var(--font-body);font-style:italic;font-size:1.35rem;color:#221D14;line-height:1.15}
-.polaroid-role{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:#8A7F66;margin-top:.3rem}
+.polaroid-role{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:#665C49;margin-top:.3rem}
 .polaroid-back .polaroid-photo{aspect-ratio:auto;flex:1;min-height:0}
 .polaroid-back .polaroid-photo img{position:absolute;inset:0}
 .polaroid-back-cap{font-family:var(--font-body);font-style:italic;color:#221D14;font-size:.95rem;padding:.7rem .3rem .9rem;line-height:1.3}
-.polaroid-back-cap small{display:block;font-family:var(--font-mono);font-style:normal;font-size:.52rem;letter-spacing:.16em;color:#8A7F66;margin-top:.35rem;text-transform:uppercase}
+.polaroid-back-cap small{display:block;font-family:var(--font-mono);font-style:normal;font-size:.52rem;letter-spacing:.16em;color:#665C49;margin-top:.35rem;text-transform:uppercase}
 .photo-pending{position:absolute;inset:0;display:flex;flex-direction:column;gap:.7rem;align-items:center;justify-content:center;background:repeating-linear-gradient(45deg,#14110C 0 12px,#181410 12px 24px);color:var(--dim)}
 .photo-pending .aperture-big{font-size:2.4rem;color:var(--amber);opacity:.7}
 .photo-pending span{font-family:var(--font-mono);font-size:.55rem;letter-spacing:.2em}
 .quote-back{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:1.4rem 1.2rem;gap:1rem;background:var(--paper-dim)}
 .quote-back p{font-family:var(--font-body);font-style:italic;font-size:1.25rem;color:#221D14;line-height:1.35}
-.quote-back small{font-family:var(--font-mono);font-size:.52rem;letter-spacing:.16em;color:#8A7F66;text-transform:uppercase}
+.quote-back small{font-family:var(--font-mono);font-size:.52rem;letter-spacing:.16em;color:#665C49;text-transform:uppercase}
 
 /* ---------- credits ---------- */
 .credits{padding:clamp(5rem,12vh,9rem) var(--pad);padding-left:calc(var(--pad) + var(--rail-w));background:var(--bg2);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
