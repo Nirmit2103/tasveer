@@ -7,7 +7,7 @@ const $  = (s,c=document)=>c.querySelector(s);
 const $$ = (s,c=document)=>[...c.querySelectorAll(s)];
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = matchMedia("(pointer: fine)").matches;
-const hasGsap = typeof window.gsap !== "undefined";
+const hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 const rand = (a,b)=>a+Math.random()*(b-a);
 const pick = a=>a[Math.floor(Math.random()*a.length)];
 
@@ -66,7 +66,7 @@ function heroEntrance(){
   if(!hasGsap||reduced){ w.classList.add("developed"); return; }
   gsap.fromTo(".hero-word .letter",{yPercent:120,rotate:6},
     {yPercent:0,rotate:0,duration:1,stagger:.055,ease:"power4.out",onComplete:develop});
-  gsap.fromTo([".hero-sub",".hero-shoot",".hero-scroll",".hud-tl",".hud-tr",".hud-rec",".vf-corners span"],
+  gsap.fromTo([".hero-sub",".hero-shoot",".hero-scroll",".hud-tl",".hud-meta",".hud-af",".hud-tr",".hud-rec",".vf-corners span"],
     {opacity:0,y:14},{opacity:1,y:0,duration:.9,stagger:.05,ease:"power3.out",delay:.35});
 }
 function endIntro(){
@@ -80,6 +80,7 @@ if (reduced || sessionStorage.getItem("tasveer_intro_seen") || !hasGsap){
   let n=3; const num=$("#leaderNum");
   const iv=setInterval(()=>{ n--; if(n<=0){clearInterval(iv);openLeader();} else num.textContent=n; },420);
   function openLeader(){
+    if(intro.classList.contains("open")||intro.classList.contains("done")) return;
     intro.classList.add("open"); shutterSound();
     setTimeout(endIntro,520);
   }
@@ -135,7 +136,7 @@ $$("main section[data-frame]").forEach(sec=>{
 const tickerItems="35MM <i>·</i> ƒ/1.8 <i>·</i> ISO 400 <i>·</i> TASVEER <i>·</i> IIIT DELHI <i>·</i> SHOOT FIRST <i>·</i> DEVELOP LATER <i>·</i> ";
 $("#tickerTrack").innerHTML=`<span>${tickerItems.repeat(4)}</span><span>${tickerItems.repeat(4)}</span>`;
 if(hasGsap&&!reduced) gsap.to("#tickerTrack",{xPercent:-50,duration:36,ease:"none",repeat:-1});
-const edge="TASVEER 400TX ▸ SAFELIGHT ▸ PROCESS BEFORE 2027 ▸ ";
+const edge="TASVEER 400C ▸ COLOR ▸ PROCESS BEFORE 2027 ▸ ";
 $$(".strip-edgeprint").forEach(el=>el.textContent=edge.repeat(8));
 
 /* ---------- hero: click to shoot ---------- */
@@ -179,6 +180,10 @@ function shoot(){
     gsap.fromTo(".hero-word",{scale:1.012},{scale:1,duration:.5,ease:"elastic.out(1,.5)"});
   }
   ejectPolaroid(pick(shootPool));
+  if(exp===3 && !sessionStorage.getItem("tasveer_egg_hint")){
+    sessionStorage.setItem("tasveer_egg_hint","1");
+    setTimeout(()=>toast("THE APERTURE LOGO KEEPS A SECRET — FIVE CLICKS.",3400),1200);
+  }
 }
 hero.addEventListener("click",e=>{ if(e.target.closest("a,button,.tray-polaroid")) return; shoot(); });
 
@@ -224,7 +229,7 @@ for(let k=0;k<2;k++){
   a.className="frame frame-empty";
   a.href=`mailto:${CONFIG.email}?subject=My%20frame%20for%20the%20Tasveer%20roll`;
   a.innerHTML=`
-    <div class="frame-img-wrap"><span class="plus">+</span><span class="mono">AWAITING EXPOSURE<br>your shot here — write to us</span></div>
+    <div class="frame-img-wrap"><span class="plus">+</span><span class="mono">RESERVED FOR YOU<br>join the crew — shoot this frame</span></div>
     <p class="frame-cap mono">ROLL 001 · FR ${String(GALLERY.length+k+1).padStart(2,"0")} — PENDING</p>`;
   stripFrames.appendChild(a);
 }
@@ -299,6 +304,13 @@ addEventListener("keydown",e=>{
   if(e.key==="Escape")closeLightbox();
   if(e.key==="ArrowLeft")$("#lbPrev").click();
   if(e.key==="ArrowRight")$("#lbNext").click();
+  if(e.key==="Tab"){
+    const f=[$("#lbClose"),$("#lbPrev"),$("#lbNext")].filter(b=>b.style.visibility!=="hidden");
+    const i=f.indexOf(document.activeElement);
+    e.preventDefault();
+    const n=e.shiftKey?(i<=0?f.length-1:i-1):(i+1)%f.length;
+    f[n].focus();
+  }
 });
 
 /* ---------- team wall ---------- */
@@ -313,6 +325,7 @@ DEPTS.forEach(([key,label],i)=>{
       p.classList.toggle("filtered-out",!show);
       if(show&&hasGsap&&!reduced)gsap.fromTo(p,{opacity:0,y:18},{opacity:1,y:0,duration:.5,ease:"power3.out"});
     });
+    if(hasGsap) ScrollTrigger.refresh();
   });
   filters.appendChild(c);
 });
@@ -325,12 +338,12 @@ TEAM.forEach((t,i)=>{
   b.style.setProperty("--tape-rot",`${i%2?-3:2}deg`);
   const frontPhoto=t.img
     ?`<img src="assets/team/${t.img}" alt="Portrait of ${t.name}" loading="lazy">`
-    :`<div class="photo-pending"><span class="aperture-big">◉</span><span>FRAME PENDING</span></div>`;
+    :`<div class="photo-pending"><span class="aperture-big">◉</span><span>AWAITING EXPOSURE</span></div>`;
   let back;
   if(t.child){
     back=`<div class="polaroid-face polaroid-back">
       <div class="polaroid-photo"><img src="assets/team/${t.child}" alt="${t.name} as a kid" loading="lazy"></div>
-      <p class="polaroid-back-cap">${t.backCap||"frame zero — before Tasveer had a name"}<small>FRAME 00 · ${t.name} · 400TX</small></p></div>`;
+      <p class="polaroid-back-cap">${t.backCap||"frame zero — before Tasveer had a name"}<small>FRAME 00 · ${t.name} · 400C</small></p></div>`;
   } else if(t.back?.type==="quote"){
     back=`<div class="polaroid-face polaroid-back"><div class="quote-back"><p>“${t.back.text}”</p><small>${t.back.tag}</small></div></div>`;
   } else {
