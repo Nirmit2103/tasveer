@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TASVEER — CAMCORDER MODE · Media Society of IIIT Delhi</title>
+<meta name="description" content="Tasveer, the media society of IIIT Delhi — viewed through a Y2K MiniDV camcorder. Playback, crew files, setup and pairing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=VT323&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/camcorder.css">
+</head>
+<body>
+
+<!-- ======= PERSISTENT OSD ======= -->
+<div class="osd" id="osd">
+  <div class="osd-corner osd-tl" aria-hidden="true">
+    <span class="rec"><span class="rec-dot">●</span> REC</span>
+    <span class="sp">SP</span>
+  </div>
+
+  <div class="osd-corner osd-tr">
+    <div class="battery-wrap" aria-hidden="true">
+      <span class="battery-pct" id="battery-pct">100%</span>
+      <span class="battery"><span class="battery-fill" id="battery-fill"></span></span>
+    </div>
+    <button class="osd-btn menu-btn" id="menu-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="cam-menu">MENU</button>
+  </div>
+
+  <div class="osd-corner osd-bl" aria-hidden="true">
+    <span class="live-tag">LIVE</span>
+    <span class="timestamp" id="timestamp">2026.11.20 12:00:00 AM</span>
+  </div>
+
+  <div class="osd-corner osd-br" aria-hidden="true">
+    <span class="zoom-rocker">W <span class="zoom-blocks" id="zoom-blocks"><span>▮</span><span>▮</span><span>▮</span><span>▮</span></span> T</span>
+  </div>
+
+  <div class="focus-box" id="focus-box" aria-hidden="true"></div>
+</div>
+
+<div class="scanlines" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="toast" id="low-battery-toast" role="status" hidden>LOW BATTERY — KEEP SHOOTING</div>
+
+<!-- ======= CAMCORDER MENU (dialog) ======= -->
+<div class="cam-menu" id="cam-menu" role="dialog" aria-modal="true" aria-label="Camcorder menu" hidden>
+  <div class="cam-menu-inner">
+    <p class="cam-menu-title">CAMCORDER MENU</p>
+    <ul class="cam-menu-list" id="cam-menu-list">
+      <li><button class="cam-menu-item" data-target="playback">PLAYBACK — THE ROLL</button></li>
+      <li><button class="cam-menu-item" data-target="crew">MEMORY CARD — THE CREW</button></li>
+      <li><button class="cam-menu-item" data-target="setup">SETUP — CREDITS</button></li>
+      <li><button class="cam-menu-item" data-target="connect">CONNECT — JOIN</button></li>
+      <li><button class="cam-menu-item" data-target="top">VIEWFINDER — TOP</button></li>
+    </ul>
+    <p class="cam-menu-hint" aria-hidden="true">▲▼ SELECT · ENTER OK · ESC EXIT</p>
+  </div>
+</div>
+
+<!-- ======= HERO / VIEWFINDER ======= -->
+<header class="hero" id="top">
+  <img class="hero-bg" src="assets/gallery/frame-03.webp" alt="" aria-hidden="true">
+  <div class="hero-shade" aria-hidden="true"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">MINIDV · HANDYCAMS · EST. IIIT DELHI</p>
+    <h1 class="hero-title">TASVEER</h1>
+    <p class="hero-sub">THE MEDIA SOCIETY OF IIIT DELHI</p>
+    <p class="hero-sub hero-sub-dim">PLAYBACK AVAILABLE — PRESS PLAY</p>
+    <button class="play-btn" id="hero-play">▶ PLAY</button>
+    <p class="hero-tc" aria-hidden="true">TC <span id="hero-timecode">0:00:00</span></p>
+  </div>
+  <div class="sweep" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+
+  <!-- ======= PLAYBACK / GALLERY ======= -->
+  <section class="section" id="playback" aria-labelledby="playback-title">
+    <div class="section-head">
+      <p class="section-tag">▶ PLAYBACK</p>
+      <h2 class="section-title" id="playback-title">THE ROLL</h2>
+      <p class="section-note">Five frames off the tape. Scrub it, run it, pause on the good ones.</p>
+    </div>
+
+    <div class="transport" role="group" aria-label="Tape transport controls">
+      <button class="transport-btn" id="btn-rew">◀◀ REW</button>
+      <button class="transport-btn" id="btn-play" aria-pressed="false">▶ PLAY</button>
+      <button class="transport-btn" id="btn-ff">FF ▶▶</button>
+    </div>
+
+    <div class="strip" id="strip" tabindex="0" aria-label="Gallery frames, horizontal strip"></div>
+
+    <div class="scrubber-row">
+      <span class="scrubber-label" aria-hidden="true">00:00</span>
+      <input type="range" class="scrubber" id="scrubber" min="0" max="1000" value="0" step="1" aria-label="Tape position scrubber">
+      <span class="scrubber-label" aria-hidden="true">END</span>
+    </div>
+    <div class="sweep" aria-hidden="true"></div>
+  </section>
+
+  <!-- ======= MEMORY CARD / CREW ======= -->
+  <section class="section" id="crew" aria-labelledby="crew-title">
+    <div class="section-head">
+      <p class="section-tag">▤ MEMORY CARD</p>
+      <h2 class="section-title" id="crew-title">THE CREW</h2>
+      <p class="section-note">16 files on the card. Open one to see who they were before the camera.</p>
+    </div>
+
+    <div class="dcim-bar">
+      <span class="dcim-path">DCIM ▸ 100TASVR</span>
+      <span class="dcim-count" id="dcim-count">16 FILE(S)</span>
+    </div>
+
+    <div class="dept-tabs" id="dept-tabs" role="group" aria-label="Filter crew by department"></div>
+
+    <div class="crew-grid" id="crew-grid"></div>
+    <div class="sweep" aria-hidden="true"></div>
+  </section>
+
+  <!-- ======= SETUP / CREDITS ======= -->
+  <section class="section" id="setup" aria-labelledby="setup-title">
+    <div class="section-head">
+      <p class="section-tag">■ SETUP</p>
+      <h2 class="section-title" id="setup-title">CREDITS</h2>
+      <p class="section-note">Every department, configured. Do not adjust the tracking.</p>
+    </div>
+    <div class="setup-screen">
+      <p class="setup-screen-title" aria-hidden="true">SETUP — DEPARTMENT CONFIG</p>
+      <ul class="credits-list" id="credits-list"></ul>
+      <p class="setup-screen-foot" aria-hidden="true">ALL SETTINGS SAVED TO TAPE</p>
+    </div>
+    <div class="sweep" aria-hidden="true"></div>
+  </section>
+
+  <!-- ======= CONNECT / JOIN ======= -->
+  <section class="section" id="connect" aria-labelledby="connect-title">
+    <div class="section-head">
+      <p class="section-tag">⇄ CONNECT</p>
+      <h2 class="section-title" id="connect-title">PAIR WITH TASVEER</h2>
+    </div>
+
+    <div class="pair-card">
+      <dl class="pair-meta">
+        <div><dt>DEVICE:</dt><dd>TASVEER_MEDIA_SOC</dd></div>
+        <div><dt>STATUS:</dt><dd class="pair-status">DISCOVERABLE</dd></div>
+        <div><dt>CHANNEL:</dt><dd id="pair-email">tasveer@sc.iiitd.ac.in</dd></div>
+      </dl>
+      <p class="pair-copy">Recruitment opens every semester. Bring a camera, a phone, or just the eye.</p>
+      <a class="connect-btn" id="connect-btn" href="mailto:tasveer@sc.iiitd.ac.in?subject=I%20want%20to%20join%20Tasveer">CONNECT ▶</a>
+      <a class="insta-btn" id="insta-btn" href="#" hidden>PAIR VIA INSTAGRAM ↗</a>
+    </div>
+    <div class="sweep" aria-hidden="true"></div>
+  </section>
+
+</main>
+
+<!-- ======= FOOTER ======= -->
+<footer class="footer">
+  <p class="footer-tape">END OF TAPE — REWIND?</p>
+  <button class="rewind-btn" id="rewind-btn">◀◀ REWIND</button>
+  <p class="footer-copy">© 2026 TASVEER · IIIT DELHI</p>
+</footer>
+
+<!-- ======= LIGHTBOX / PAUSE SCREEN ======= -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Paused frame" hidden>
+  <div class="lightbox-inner">
+    <p class="lb-osd" aria-hidden="true">PAUSE ▮▮ <span class="lb-count" id="lb-count">FR 01 / 05</span></p>
+    <img class="lb-img" id="lb-img" alt="">
+    <p class="lb-cap" id="lb-cap"></p>
+    <div class="lb-controls">
+      <button class="lb-btn" id="lb-prev" aria-label="Previous frame">◀ PREV</button>
+      <button class="lb-btn" id="lb-close">✕ RESUME</button>
+      <button class="lb-btn" id="lb-next" aria-label="Next frame">NEXT ▶</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/camcorder.js"></script>
+</body>
+</html>
