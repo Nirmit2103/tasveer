@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TASVEER — The Media Society of IIIT Delhi</title>
+<meta name="description" content="Tasveer is IIIT Delhi's media society. We shoot, film, design and archive the campus's memory. Step into the darkroom.">
+<meta property="og:title" content="TASVEER — The Media Society of IIIT Delhi">
+<meta property="og:description" content="Every event ends. The frame doesn't. Step into the darkroom.">
+<meta property="og:image" content="assets/og.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0B0A08">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#about">Skip to content</a>
+
+<!-- film grain overlay -->
+<div class="grain" aria-hidden="true"></div>
+
+<!-- custom focus-reticle cursor -->
+<div class="cursor" aria-hidden="true">
+  <span class="cursor-tl"></span><span class="cursor-tr"></span>
+  <span class="cursor-bl"></span><span class="cursor-br"></span>
+  <span class="cursor-dot"></span>
+  <span class="cursor-label"></span>
+</div>
+
+<!-- shutter intro -->
+<div id="intro" aria-hidden="true">
+  <div class="intro-blade intro-blade-top"></div>
+  <div class="intro-blade intro-blade-bottom"></div>
+  <div class="intro-center">
+    <div class="intro-word">TASVEER</div>
+    <div class="intro-count mono">LEADER <span id="introCount">3</span></div>
+  </div>
+</div>
+
+<!-- nav -->
+<header class="nav" id="nav">
+  <button class="nav-logo" id="logoBtn" aria-label="Tasveer home — click 5 times for a surprise">
+    <svg class="aperture" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M16 2 L23 14 M30 16 L18 23 M16 30 L9 18 M2 16 L14 9 M23 14 L18 23 M18 23 L9 18 M9 18 L14 9 M14 9 L23 14" stroke="currentColor" stroke-width="1.6" fill="none"/>
+    </svg>
+    <span class="nav-word">TASVEER</span>
+  </button>
+  <nav class="nav-links mono" aria-label="Primary">
+    <a href="#gallery" data-cursor="GO">THE ROLL</a>
+    <a href="#team" data-cursor="GO">CREW</a>
+    <a href="#credits" data-cursor="GO">CREDITS</a>
+    <a href="#join" class="nav-join" data-cursor="GO">JOIN</a>
+  </nav>
+  <div class="nav-right">
+    <button id="soundToggle" class="sound-toggle mono" aria-pressed="true" aria-label="Toggle shutter sound" data-cursor="SOUND">
+      <span class="sound-on">SND ◉</span><span class="sound-off">SND ○</span>
+    </button>
+    <button class="nav-burger" id="burger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- mobile menu -->
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <nav class="mobile-links" aria-label="Mobile">
+    <a href="#hero"><em class="mono">FR 01</em> VIEWFINDER</a>
+    <a href="#about"><em class="mono">FR 02</em> THE SOCIETY</a>
+    <a href="#gallery"><em class="mono">FR 03</em> THE ROLL</a>
+    <a href="#team"><em class="mono">FR 04</em> THE CREW</a>
+    <a href="#credits"><em class="mono">FR 05</em> CREDITS</a>
+    <a href="#join"><em class="mono">FR 06</em> JOIN</a>
+  </nav>
+  <p class="mono mobile-foot">TASVEER · IIIT DELHI · ALWAYS ROLLING</p>
+</div>
+
+<!-- sprocket rail -->
+<aside class="rail mono" aria-hidden="true">
+  <div class="rail-perf" id="railPerf"></div>
+  <div class="rail-frame">FR <span id="railFrame">01</span>/06</div>
+  <div class="rail-section" id="railSection">VIEWFINDER</div>
+</aside>
+
+<main id="main">
+
+  <!-- ============ FR 01 · HERO / VIEWFINDER ============ -->
+  <section class="hero" id="hero" data-frame="01" data-section="VIEWFINDER">
+    <div class="vf-corners" aria-hidden="true">
+      <span class="vf-tl"></span><span class="vf-tr"></span><span class="vf-bl"></span><span class="vf-br"></span>
+    </div>
+    <div class="hud hud-tl mono">TASVEER · MEDIA SOC · IIITD</div>
+    <div class="hud hud-tr mono">ISO 400 · ƒ/1.8 · 1/250</div>
+    <div class="hud hud-rec mono"><span class="rec-dot"></span> REC</div>
+    <div class="hud hud-focus mono" aria-hidden="true"><span>∞</span><span>10</span><span>5</span><span>3</span><span>2</span><span>1.5</span><span>1<i>m</i></span></div>
+    <svg class="hero-aperture" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1"/>
+      <circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width=".6"/>
+      <g stroke="currentColor" stroke-width=".8" fill="none">
+        <path d="M50 4 L70 38 M96 50 L62 70 M50 96 L30 62 M4 50 L38 30 M70 38 L62 70 L30 62 L38 30 Z"/>
+      </g>
+    </svg>
+
+    <div class="hero-type">
+      <h1 class="hero-word" id="heroWord">TASVEER</h1>
+      <p class="hero-sub">the media society of IIIT Delhi — <em>we keep the frame running.</em></p>
+    </div>
+
+    <div class="hero-shoot mono">
+      <span class="shoot-hint">CLICK ANYWHERE TO SHOOT</span>
+      <span class="shoot-count">EXP <span id="expCount">00</span>/36 · ROLL <span id="rollCount">001</span></span>
+    </div>
+
+    <div class="hero-scroll mono" aria-hidden="true">SCROLL TO DEVELOP <span class="scroll-arrow">↓</span></div>
+
+    <!-- polaroid tray -->
+    <div class="tray" id="tray" aria-live="polite" aria-label="Your shot polaroids"></div>
+    <div class="flash" id="flash" aria-hidden="true"></div>
+  </section>
+
+  <!-- ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track mono" id="tickerTrack"></div>
+  </div>
+
+  <!-- ============ FR 02 · MANIFESTO ============ -->
+  <section class="about" id="about" data-frame="02" data-section="THE SOCIETY">
+    <p class="section-tag mono"><span class="tag-dot"></span>FR 02 / THE SOCIETY</p>
+    <h2 class="manifesto">
+      <span class="line"><span>Every event ends.</span></span>
+      <span class="line"><span>The <em>frame</em> doesn't.</span></span>
+    </h2>
+    <div class="about-cols">
+      <p class="about-body">Tasveer is IIIT Delhi's media society — the ones behind the lens at every fest, every talk, every 2&nbsp;AM deadline. We photograph, film, design and archive the campus's memory, one roll at a time.</p>
+      <ul class="about-specs mono">
+        <li><span>FORMAT</span><span>35MM &amp; DIGITAL</span></li>
+        <li><span>BASED</span><span>OKHLA PHASE III, DELHI</span></li>
+        <li><span>CREW</span><span>16 &amp; COUNTING</span></li>
+        <li><span>STATUS</span><span class="status-live"><span class="rec-dot"></span>ALWAYS ROLLING</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ FR 03 · GALLERY / FILMSTRIP ============ -->
+  <section class="gallery" id="gallery" data-frame="03" data-section="THE ROLL">
+    <div class="gallery-head">
+      <p class="section-tag mono"><span class="tag-dot"></span>FR 03 / THE ROLL</p>
+      <h2 class="section-title">ROLL <span class="amber">001</span></h2>
+      <p class="section-sub"><span class="hint-desktop">Hover a frame to develop it. Click to inspect.</span><span class="hint-touch">Scroll the roll — frames develop as they pass. Tap to inspect.</span> <span class="mono dim sub-note">— MORE FRAMES COMING SOON</span></p>
+    </div>
+    <div class="strip-viewport" id="stripViewport">
+      <div class="strip" id="strip">
+        <div class="strip-perf strip-perf-top" aria-hidden="true"></div>
+        <div class="strip-frames" id="stripFrames"><!-- frames injected --></div>
+        <div class="strip-perf strip-perf-bottom" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FR 04 · TEAM / POLAROID WALL ============ -->
+  <section class="team" id="team" data-frame="04" data-section="THE CREW">
+    <p class="section-tag mono"><span class="tag-dot"></span>FR 04 / THE CREW</p>
+    <h2 class="section-title">THE <span class="red">CREW</span></h2>
+    <p class="section-sub">Sixteen humans, one shared reflex: <em>reach for the camera.</em> Click a polaroid — most of them flip to a frame from before any of this began.</p>
+    <div class="crew-filters mono" id="crewFilters" role="group" aria-label="Filter crew by department"><!-- chips injected --></div>
+    <div class="polaroid-wall" id="polaroidWall"><!-- polaroids injected --></div>
+  </section>
+
+  <!-- ============ FR 05 · CREDITS ============ -->
+  <section class="credits" id="credits" data-frame="05" data-section="CREDITS">
+    <p class="section-tag mono"><span class="tag-dot"></span>FR 05 / WHAT WE DO</p>
+    <div class="credits-roll" id="creditsRoll">
+      <p class="credits-header mono">A TASVEER PRODUCTION</p>
+      <!-- rows injected -->
+      <p class="credits-footer mono">SHOT ON CAMPUS · DEVELOPED IN THE DARKROOM</p>
+    </div>
+  </section>
+
+  <!-- ============ FR 06 · JOIN ============ -->
+  <section class="join" id="join" data-frame="06" data-section="JOIN">
+    <p class="section-tag mono"><span class="tag-dot"></span>FR 06 / LAST FRAME</p>
+    <h2 class="join-title">YOUR FRAME<br>IS <span class="red">MISSING.</span></h2>
+    <p class="join-sub">Recruitment opens every semester. Bring a camera, a phone, or just the eye — <em>we'll teach the rest.</em></p>
+    <div class="join-ctas">
+      <a class="btn-magnetic" id="joinBtn" href="mailto:tasveer@sc.iiitd.ac.in?subject=I%20want%20to%20join%20Tasveer" data-cursor="SEND">
+        <span class="btn-inner mono">WRITE TO US →</span>
+      </a>
+      <a class="btn-ghost mono" id="instaBtn" href="#" data-cursor="FOLLOW" hidden>INSTAGRAM ↗</a>
+    </div>
+    <p class="join-mail mono">tasveer@sc.iiitd.ac.in</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-top">
+    <span class="footer-word">TASVEER</span>
+    <button class="rewind mono" id="rewindBtn" data-cursor="REWIND">◀◀ REWIND TO FR 01</button>
+  </div>
+  <div class="footer-cols mono">
+    <span>THE MEDIA SOCIETY OF IIIT DELHI</span>
+    <span>OKHLA PHASE III · NEW DELHI</span>
+    <span>© 2026 TASVEER · SHOT &amp; DEVELOPED BY THE CREW</span>
+  </div>
+</footer>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Frame inspector" hidden>
+  <button class="lb-close mono" id="lbClose" aria-label="Close" data-cursor="CLOSE">✕</button>
+  <button class="lb-prev mono" id="lbPrev" aria-label="Previous frame" data-cursor="PREV">←</button>
+  <figure class="lb-figure">
+    <img id="lbImg" alt="">
+    <figcaption class="mono" id="lbCap"></figcaption>
+  </figure>
+  <button class="lb-next mono" id="lbNext" aria-label="Next frame" data-cursor="NEXT">→</button>
+</div>
+
+<!-- toast -->
+<div class="toast mono" id="toast" role="status"></div>
+
+<noscript><p style="padding:2rem;font-family:monospace">This site is a camera. Enable JavaScript to shoot.</p></noscript>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

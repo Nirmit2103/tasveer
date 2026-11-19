@@ -1,0 +1,5 @@
+.DS_Store
+team /
+*.heic
+*.HEIC
+node_modules/
