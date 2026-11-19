@@ -25,7 +25,7 @@ if (hasGsap && !reduced && typeof Lenis!=="undefined"){
   gsap.ticker.add(t=>lenis.raf(t*1000));
   gsap.ticker.lagSmoothing(0);
 }
-function scrollTo(target){
+function goTo(target){
   if (lenis) lenis.scrollTo(target,{duration:1.4});
   else $(target)?.scrollIntoView({behavior:reduced?"auto":"smooth"});
 }
@@ -122,9 +122,12 @@ function setMenu(open){
   menu.setAttribute("aria-hidden",String(!open));
   if(lenis) open?lenis.stop():lenis.start();
   else document.body.style.overflow=open?"hidden":"";
-  if(open) requestAnimationFrame(()=>menu.querySelector("a")?.focus());
+  if(open) setTimeout(()=>menu.querySelector("a")?.focus(),80);
 }
 burger.addEventListener("click",()=>setMenu(!menu.classList.contains("open")));
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && menu.classList.contains("open")){ setMenu(false); burger.focus(); }
+});
 menu.addEventListener("keydown",e=>{
   if(e.key==="Escape"){ setMenu(false); burger.focus(); }
   if(e.key==="Tab"){
@@ -135,8 +138,8 @@ menu.addEventListener("keydown",e=>{
     links[n].focus();
   }
 });
-$$(".mobile-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();setMenu(false);scrollTo(a.getAttribute("href"));}));
-$$(".nav-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();scrollTo(a.getAttribute("href"));}));
+$$(".mobile-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();setMenu(false);goTo(a.getAttribute("href"));}));
+$$(".nav-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();goTo(a.getAttribute("href"));}));
 
 /* ---------- rail ---------- */
 const railFrame=$("#railFrame"),railSection=$("#railSection");
@@ -171,7 +174,7 @@ $$(".strip-edgeprint").forEach(el=>el.textContent=edge.repeat(8));
 
 /* ---------- hero: click to shoot ---------- */
 const hero=$("#hero"),flash=$("#flash"),tray=$("#tray");
-let exp=parseInt(sessionStorage.getItem("tasveer_exp")||"0",10);
+let exp=0; // fresh tray each visit; roll number persists as lifetime counter
 let roll=parseInt(sessionStorage.getItem("tasveer_roll")||"1",10);
 const expEl=$("#expCount"),rollEl=$("#rollCount");
 function paintCounter(){
@@ -182,13 +185,19 @@ function paintCounter(){
 paintCounter();
 const shootPool=[
   ...GALLERY.map(g=>({src:g.src,cap:g.cap})),
-  ...TEAM.filter(t=>t.img).map(t=>({src:`assets/team/${t.img}`,cap:`${t.name.toLowerCase()} — ${t.role.toLowerCase()}`})),
+  ...TEAM.filter(t=>t.img).map(t=>({src:`assets/team/${t.img}`,cap:`${pick(D.SHOOT_CAPTIONS)} · ${t.name.toLowerCase()}`})),
 ];
+const trayCap = () => innerWidth<=900 ? 3 : CONFIG.traySize;
 function ejectPolaroid(item){
   const fig=document.createElement("figure");
   fig.className="tray-polaroid";
-  fig.innerHTML=`<img src="${esc(item.src)}" alt="Your shot: ${esc(item.cap)}"><figcaption>${esc(item.cap)}</figcaption>`;
-  fig.addEventListener("click",ev=>{ev.stopPropagation();openLightbox([item],0);});
+  fig.setAttribute("role","button");
+  fig.setAttribute("tabindex","0");
+  fig.setAttribute("aria-label",`Your shot: ${item.cap}. Activate to inspect.`);
+  fig.innerHTML=`<img src="${esc(item.src)}" alt=""><figcaption>${esc(item.cap)}</figcaption>`;
+  const inspect=ev=>{ev.stopPropagation();openLightbox([item],0);};
+  fig.addEventListener("click",inspect);
+  fig.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();inspect(ev);}});
   tray.appendChild(fig);
   if(hasGsap&&!reduced){
     gsap.fromTo(fig,{yPercent:150,y:0,rotate:rand(-14,14)},{yPercent:0,y:0,rotate:rand(-4,4),duration:.9,ease:"back.out(1.6)"});
@@ -196,13 +205,14 @@ function ejectPolaroid(item){
   // bound the tray WITHOUT async removal inside the loop (freeze bug):
   // mark leaving prints absolute (out of flex flow) and remove on animation end.
   const active=[...tray.children].filter(c=>!c.classList.contains("leaving"));
-  while(active.length>CONFIG.traySize){
+  while(active.length>trayCap()){
     const old=active.shift();
     old.classList.add("leaving");
     old.style.pointerEvents="none";
+    old.setAttribute("tabindex","-1");
     if(hasGsap&&!reduced){
       old.style.position="absolute"; old.style.bottom="0";
-      gsap.to(old,{yPercent:160,opacity:0,duration:.45,ease:"power2.in",onComplete:()=>old.remove()});
+      gsap.to(old,{yPercent:160,opacity:0,duration:.45,ease:"power2.in",overwrite:"auto",onComplete:()=>old.remove()});
     } else old.remove();
   }
 }
@@ -211,7 +221,7 @@ function shoot(){
   if(exp>=CONFIG.maxExposures){exp=0;roll++;toast(`ROLL ${String(roll-1).padStart(3,"0")} COMPLETE — FRESH ROLL LOADED`);}
   exp++; paintCounter(); shutterSound();
   const now=performance.now();
-  if(hasGsap&&!reduced&&now-lastFlash>250){
+  if(hasGsap&&!reduced&&!document.body.classList.contains("calm")&&now-lastFlash>500){
     lastFlash=now;
     gsap.fromTo(flash,{opacity:.6},{opacity:0,duration:.4,ease:"power2.out"});
     gsap.fromTo(".hero-word",{scale:1.012},{scale:1,duration:.5,ease:"elastic.out(1,.5)"});
@@ -227,6 +237,7 @@ function shoot(){
   }
 }
 hero.addEventListener("click",e=>{ if(e.target.closest("a,button,.tray-polaroid")) return; shoot(); });
+$("#shootBtn").addEventListener("click",e=>{ e.stopPropagation(); shoot(); });
 
 /* ---------- reveals (visible-by-default) ---------- */
 function revealOnEnter(trigger,targets,fromVars,toVars){
@@ -243,7 +254,7 @@ revealOnEnter(".join",".join-title,.join-sub,.join-ctas,.join-mail",{opacity:0,y
 const mini=$("#miniStrip");
 [GALLERY[1],GALLERY[2],GALLERY[4]].forEach(g=>{
   const d=document.createElement("div"); d.className="mini-frame";
-  d.innerHTML=`<img src="${g.src}" alt="" loading="lazy">`;
+  d.innerHTML=`<img src="${esc(g.src)}" alt="" loading="lazy">`;
   mini.appendChild(d);
 });
 
@@ -283,7 +294,7 @@ function developFrame(f){
     s++;
     if(s>=7){clearInterval(iv);tag.textContent="FIXED ▸";setTimeout(()=>{tag.style.opacity=0;},900);}
     else tag.textContent=`DEVELOPING 0:0${s}`;
-  },180);
+  },1000);
 }
 const strip=$("#strip"),stripViewport=$("#stripViewport");
 function developVisibleFrames(){
@@ -309,6 +320,7 @@ function nativeStrip(){
 if(hasGsap&&!reduced){
   const mm=gsap.matchMedia();
   mm.add("(min-width: 901px)",()=>{
+    stripViewport.scrollLeft=0;
     const dist=()=>Math.max(0,strip.scrollWidth-stripViewport.clientWidth);
     const tween=gsap.to(strip,{x:()=>-dist(),ease:"none",
       scrollTrigger:{trigger:".gallery",start:"top top",end:()=>"+="+(dist()+innerHeight*.4),pin:true,scrub:.6,invalidateOnRefresh:true,onUpdate:developVisibleFrames}});
@@ -329,17 +341,23 @@ if(hasGsap){
   }});
 }
 
-/* keyboard: bring focused frames into view (pinned strip + native strip) */
+/* keyboard: bring focused frames FULLY into view (pinned strip + native strip) */
 stripFrames.addEventListener("focusin",e=>{
   const f=e.target.closest(".frame"); if(!f) return;
   const r=f.getBoundingClientRect();
-  if(r.left>=0 && r.right<=innerWidth) return;
+  if(r.left>=8 && r.right<=innerWidth-8) return;
   const st=hasGsap ? ScrollTrigger.getAll().find(t=>t.trigger===$(".gallery") && t.pin) : null;
-  if(st && st.isActive){
-    const frac=(f.offsetLeft + f.offsetWidth/2) / strip.scrollWidth;
-    const target=st.start + frac*(st.end-st.start);
+  if(st){
+    const vpLeft=stripViewport.getBoundingClientRect().left;
+    const dist=Math.max(1,strip.scrollWidth-stripViewport.clientWidth);
+    // desired strip x so the frame sits centered; clamp so it's fully visible
+    const ideal=innerWidth/2 - vpLeft - f.offsetLeft - f.offsetWidth/2;
+    const lo=Math.max(-dist, 64 - vpLeft - f.offsetLeft);
+    const hi=Math.min(0, innerWidth-8 - vpLeft - f.offsetLeft - f.offsetWidth);
+    const x=Math.min(Math.max(ideal,lo),Math.max(lo,hi));
+    const target=st.start + (-x)/dist*(st.end-st.start);
     if(lenis) lenis.scrollTo(target,{duration:.6}); else window.scrollTo(0,target);
-  } else {
+  } else if(getComputedStyle(stripViewport).overflowX==="auto"){
     stripViewport.scrollTo({left:Math.max(0,f.offsetLeft-60),behavior:reduced?"auto":"smooth"});
   }
 });
@@ -358,8 +376,10 @@ function openLightbox(items,index){
 function paintLb(){
   const it=lbItems[lbIndex];
   lbImg.src=it.src; lbImg.alt=it.cap; lbCap.textContent=it.cap;
-  $("#lbPrev").style.visibility=lbItems.length>1?"visible":"hidden";
-  $("#lbNext").style.visibility=lbItems.length>1?"visible":"hidden";
+  $("#lbCount").textContent = lbItems.length>1 ? `FR ${String(lbIndex+1).padStart(2,"0")} / ${String(lbItems.length).padStart(2,"0")}` : "YOUR SHOT";
+  const multi=lbItems.length>1;
+  $("#lbPrev").style.visibility=multi?"visible":"hidden";
+  $("#lbNext").style.visibility=multi?"visible":"hidden";
 }
 function closeLightbox(){
   lb.classList.remove("show");
@@ -378,13 +398,22 @@ addEventListener("keydown",e=>{
   if(e.key==="ArrowLeft")$("#lbPrev").click();
   if(e.key==="ArrowRight")$("#lbNext").click();
   if(e.key==="Tab"){
-    const f=[$("#lbClose"),$("#lbPrev"),$("#lbNext")].filter(b=>b.style.visibility!=="hidden");
+    const f=[$("#lbClose"),$("#lbPrev"),$("#lbNext")].filter(b=>getComputedStyle(b).display!=="none"&&b.style.visibility!=="hidden");
     const i=f.indexOf(document.activeElement);
     e.preventDefault();
     const n=e.shiftKey?(i<=0?f.length-1:i-1):(i+1)%f.length;
     f[n].focus();
   }
 });
+/* touch swipe navigation in the lightbox */
+let lbTouchX=null;
+lb.addEventListener("touchstart",e=>{lbTouchX=e.touches[0].clientX;},{passive:true});
+lb.addEventListener("touchend",e=>{
+  if(lbTouchX===null||lbItems.length<2) return;
+  const dx=e.changedTouches[0].clientX-lbTouchX;
+  if(Math.abs(dx)>45){ (dx<0?$("#lbNext"):$("#lbPrev")).click(); }
+  lbTouchX=null;
+},{passive:true});
 
 /* ---------- team wall ---------- */
 const wall=$("#polaroidWall"),filters=$("#crewFilters");
@@ -440,7 +469,7 @@ revealOnEnter(".polaroid-wall",".polaroid",{opacity:0,y:40,rotate:()=>rand(-8,8)
 const creditsRoll=$("#creditsRoll"),creditsFooter=$(".credits-footer");
 CREDITS.forEach(([dept,desc])=>{
   const row=document.createElement("div"); row.className="credit-row";
-  row.innerHTML=`<span class="credit-dept">${dept}</span><span class="credit-desc">${desc}</span>`;
+  row.innerHTML=`<span class="credit-dept">${esc(dept)}</span><span class="credit-desc">${esc(desc)}</span>`;
   creditsRoll.insertBefore(row,creditsFooter);
 });
 revealOnEnter(".credits-roll",".credit-row",{opacity:0,y:26},{opacity:1,y:0,duration:.7,stagger:.09,ease:"power3.out"});
@@ -457,7 +486,7 @@ if(finePointer&&hasGsap&&!reduced){
 if(CONFIG.instagram){
   const ib=$("#instaBtn"); ib.href=CONFIG.instagram; ib.hidden=false; ib.target="_blank"; ib.rel="noopener";
 }
-$("#rewindBtn").addEventListener("click",()=>{scrollTo("#hero");toast("◀◀ REWINDING…");});
+$("#rewindBtn").addEventListener("click",()=>{goTo("#hero");toast("◀◀ REWINDING…");});
 
 /* ---------- darkroom egg ---------- */
 let logoClicks=0,logoTimer=null;
@@ -468,7 +497,7 @@ $("#logoBtn").addEventListener("click",()=>{
     document.body.classList.toggle("darkroom");
     toast(document.body.classList.contains("darkroom")?"DARKROOM MODE — SAFELIGHT ON. HANDLE WITH CARE.":"LIGHTS ON. BACK TO THE VIEWFINDER.");
     shutterSound();
-  } else if(logoClicks===1) scrollTo("#hero");
+  } else if(logoClicks===1) goTo("#hero");
 });
 
 let rT;

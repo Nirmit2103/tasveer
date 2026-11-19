@@ -55,7 +55,7 @@
     <button id="soundToggle" class="sound-toggle mono" aria-pressed="true" aria-label="Toggle shutter sound" data-cursor="SOUND">
       <span class="sound-on">SND ◉</span><span class="sound-off">SND ○</span>
     </button>
-    <button id="motionToggle" class="sound-toggle mono" aria-pressed="true" aria-label="Pause ambient motion (blinking, marquee, grain)" data-cursor="MOTION">
+    <button id="motionToggle" class="sound-toggle mono" aria-pressed="true" aria-label="Ambient motion (blinking, marquee, grain)" data-cursor="MOTION">
       <span class="sound-on">MOT ◉</span><span class="sound-off">MOT ○</span>
     </button>
     <button class="nav-burger" id="burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
@@ -95,8 +95,8 @@
     <div class="hud hud-tl mono">TASVEER · MEDIA SOC · IIITD</div>
     <div class="hud hud-meta mono" aria-hidden="true"><span><b>FR 00</b> · TEST FRAME</span><span>35MM · TASVEER 400C</span><span>OKHLA → DELHI · 28.5°N</span></div>
     <div class="hud-af" aria-hidden="true"><span>AF</span></div>
-    <div class="hud hud-tr mono">ISO 400 · ƒ/1.8 · 1/250</div>
-    <div class="hud hud-rec mono"><span class="rec-dot"></span> REC</div>
+    <div class="hud hud-tr mono" aria-hidden="true">ISO 400 · ƒ/1.8 · 1/250</div>
+    <div class="hud hud-rec mono" aria-hidden="true"><span class="rec-dot"></span> REC</div>
     <div class="hud hud-focus mono" aria-hidden="true"><span>∞</span><span>10</span><span>5</span><span>3</span><span>2</span><span>1.5</span><span>1<i>m</i></span></div>
 
     <div class="hero-type">
@@ -106,6 +106,7 @@
 
     <div class="hero-shoot mono">
       <span class="shoot-hint"><span class="hint-desktop">CLICK ANYWHERE TO SHOOT</span><span class="hint-touch">TAP ANYWHERE TO SHOOT</span></span>
+      <button id="shootBtn" class="shoot-btn mono" data-cursor="SHOOT">SHOOT ⏎</button>
       <span class="shoot-count">EXP <span id="expCount">00</span>/36 · ROLL <span id="rollCount">001</span></span>
     </div>
     <div class="hero-scroll mono" aria-hidden="true">SCROLL TO DEVELOP <span class="scroll-arrow">↓</span></div>
@@ -200,7 +201,7 @@
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Frame inspector" hidden>
   <button class="lb-close mono" id="lbClose" aria-label="Close" data-cursor="CLOSE">✕</button>
   <button class="lb-prev mono" id="lbPrev" aria-label="Previous frame" data-cursor="PREV">←</button>
-  <figure class="lb-figure"><img id="lbImg" alt=""><figcaption class="mono" id="lbCap"></figcaption></figure>
+  <figure class="lb-figure"><img id="lbImg" alt=""><figcaption class="mono" id="lbCap"></figcaption><span class="lb-count mono" id="lbCount"></span></figure>
   <button class="lb-next mono" id="lbNext" aria-label="Next frame" data-cursor="NEXT">→</button>
 </div>
 
