@@ -85,13 +85,13 @@ body.has-cursor .cursor{opacity:1}
 .nav-logo:hover .aperture{transform:rotate(120deg)}
 .nav-word{font-family:var(--font-display);font-size:1.15rem;letter-spacing:.1em}
 .nav-links{display:flex;gap:1.8rem;align-items:center}
-.nav-links a{color:var(--muted);position:relative;padding:.3rem 0;transition:color .2s}
+.nav-links a{color:var(--muted);position:relative;padding:.75rem 0;transition:color .2s;min-height:44px;display:inline-flex;align-items:center}
 .nav-links a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--red);transition:width .3s var(--ease-out)}
 .nav-links a:hover{color:var(--ink)}
 .nav-links a:hover::after{width:100%}
 .nav-join{color:var(--amber)!important}
 .nav-right{display:flex;align-items:center;gap:1rem}
-.sound-toggle{color:var(--muted);padding:.4rem}
+.sound-toggle{color:var(--muted);padding:.75rem .5rem;min-height:44px}
 .sound-toggle .sound-off{display:none}
 .sound-toggle[aria-pressed="false"] .sound-on{display:none}
 .sound-toggle[aria-pressed="false"] .sound-off{display:inline}
@@ -99,8 +99,8 @@ body.has-cursor .cursor{opacity:1}
 .nav-burger span{width:26px;height:2px;background:var(--ink);transition:transform .3s}
 .nav-burger[aria-expanded="true"] span:first-child{transform:translateY(4px) rotate(45deg)}
 .nav-burger[aria-expanded="true"] span:last-child{transform:translateY(-4px) rotate(-45deg)}
-.mobile-menu{position:fixed;inset:0;z-index:135;background:#0A0908;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
-.mobile-menu.open{opacity:1;visibility:visible}
+.mobile-menu{position:fixed;inset:0;z-index:135;background:#0A0908;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s linear .35s}
+.mobile-menu.open{opacity:1;visibility:visible;transition:opacity .35s,visibility 0s}
 .mobile-links{display:flex;flex-direction:column;gap:.4rem}
 .mobile-links a{font-family:var(--font-display);font-size:clamp(2.2rem,9vw,3.5rem);letter-spacing:.04em;color:var(--ink);display:flex;align-items:baseline;gap:1rem;padding:.35rem 0;border-bottom:1px solid var(--line-soft);transform:translateY(20px);opacity:0;transition:transform .5s var(--ease-out),opacity .5s,color .2s}
 .mobile-menu.open .mobile-links a{transform:none;opacity:1}
@@ -271,7 +271,7 @@ section{position:relative}
 /* ---------- team ---------- */
 .team{padding:clamp(5rem,12vh,9rem) var(--pad);padding-left:calc(var(--pad) + var(--rail-w))}
 .crew-filters{display:flex;flex-wrap:wrap;gap:.55rem;margin:2.2rem 0 3rem}
-.chip{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:.5rem .9rem;transition:all .25s var(--ease-out);background:transparent}
+.chip{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:.8rem .95rem;min-height:44px;transition:all .25s var(--ease-out);background:transparent}
 .chip:hover{color:var(--ink);border-color:var(--muted)}
 .chip.active{color:var(--bg);background:var(--red);border-color:var(--red)}
 .polaroid-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:clamp(1.6rem,3.5vw,3rem);align-items:start}
@@ -329,9 +329,10 @@ section{position:relative}
 .footer{border-top:1px solid var(--line);padding:2.5rem var(--pad);padding-left:calc(var(--pad) + var(--rail-w));background:#080705}
 .footer-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.8rem}
 .footer-word{font-family:var(--font-display);font-size:2rem;letter-spacing:.08em;color:var(--dim)}
-.rewind{color:var(--muted);padding:.5rem 0;transition:color .2s}
+.rewind{color:var(--muted);padding:.75rem 0;min-height:44px;transition:color .2s}
 .rewind:hover{color:var(--amber)}
 .footer-cols{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--dim);font-size:.6rem}
+.footer-whisper{color:var(--dim);font-style:italic;text-transform:none;letter-spacing:.08em;opacity:.85}
 
 /* lightbox */
 .lightbox{position:fixed;inset:0;z-index:180;background:rgba(5,4,3,.94);display:flex;align-items:center;justify-content:center;gap:1rem;padding:2rem;opacity:0;transition:opacity .3s}
@@ -355,6 +356,12 @@ body.darkroom .hero,body.darkroom .credits,body.darkroom .footer{background:#120
 body.darkroom .strip{background:#0C0402}
 body.darkroom::after{content:"";position:fixed;inset:0;z-index:110;pointer-events:none;background:radial-gradient(120% 120% at 50% 0%,rgba(255,40,20,.12),rgba(120,10,0,.2));mix-blend-mode:screen}
 
+/* ---------- calm mode (motion toggle) ---------- */
+body.calm .rec-dot,body.calm .grain,body.calm .hero-photo img,
+body.calm .shoot-hint,body.calm .scroll-arrow{animation:none!important}
+body.calm .cursor{transition:none}
+.cursor.edge .cursor-label{opacity:0!important}
+
 /* ---------- responsive ---------- */
 @media (max-width:900px){
   :root{--rail-w:0px}
@@ -374,8 +381,11 @@ body.darkroom::after{content:"";position:fixed;inset:0;z-index:110;pointer-event
   .hero-shoot{top:calc(var(--pad) + 5.8rem);bottom:auto;right:var(--pad)}
   .vf-corners .vf-bl,.vf-corners .vf-br{bottom:calc(var(--pad) + 7.6rem)}
   .about,.gallery-head,.team,.credits,.join,.footer{padding-left:var(--pad)}
-  .tray-polaroid{width:92px;padding:5px 5px 20px}
-  .tray-polaroid figcaption{font-size:.55rem;bottom:3px}
+  .tray{bottom:.6rem}
+  .tray-polaroid{width:96px;padding:5px 5px 30px}
+  .tray-polaroid figcaption{font-size:.55rem;bottom:3px;white-space:normal;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .crew-filters{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent);scroll-snap-type:x proximity}
+  .chip{scroll-snap-align:start}
   .polaroid-wall{grid-template-columns:repeat(2,1fr);gap:1.4rem}
   .polaroid-name{font-size:1.05rem}
   .polaroid-back-cap{font-size:.8rem}

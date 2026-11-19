@@ -10,6 +10,7 @@ const finePointer = matchMedia("(pointer: fine)").matches;
 const hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 const rand = (a,b)=>a+Math.random()*(b-a);
 const pick = a=>a[Math.floor(Math.random()*a.length)];
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 function toast(msg,ms=2600){
   const t=$("#toast"); t.textContent=msg; t.classList.add("show");
@@ -36,6 +37,7 @@ function shutterSound(){
   try{
     audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
     const ctx=audioCtx,t=ctx.currentTime;
+    if(ctx.state==="suspended") ctx.resume();
     const buf=ctx.createBuffer(1,ctx.sampleRate*.09,ctx.sampleRate);
     const d=buf.getChannelData(0);
     for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.2);
@@ -94,7 +96,7 @@ if (finePointer && !reduced){
   const cur=$(".cursor"),label=$(".cursor-label");
   let mx=innerWidth/2,my=innerHeight/2,cx=mx,cy=my;
   addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;});
-  if (hasGsap) gsap.ticker.add(()=>{cx+=(mx-cx)*.2;cy+=(my-cy)*.2;cur.style.transform=`translate3d(${cx}px,${cy}px,0)`;});
+  if (hasGsap) gsap.ticker.add(()=>{cx+=(mx-cx)*.2;cy+=(my-cy)*.2;cur.style.transform=`translate3d(${cx}px,${cy}px,0)`;cur.classList.toggle("edge",cx>innerWidth-80);});
   document.addEventListener("mouseover",e=>{
     const t=e.target.closest("[data-cursor],a,button,.frame,.polaroid");
     if(t){cur.classList.add("is-active");label.textContent=t.dataset.cursor||(t.classList.contains("polaroid")?"FLIP":t.classList.contains("frame")?"OPEN":"GO");}
@@ -119,8 +121,20 @@ function setMenu(open){
   menu.classList.toggle("open",open);
   menu.setAttribute("aria-hidden",String(!open));
   if(lenis) open?lenis.stop():lenis.start();
+  else document.body.style.overflow=open?"hidden":"";
+  if(open) requestAnimationFrame(()=>menu.querySelector("a")?.focus());
 }
 burger.addEventListener("click",()=>setMenu(!menu.classList.contains("open")));
+menu.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ setMenu(false); burger.focus(); }
+  if(e.key==="Tab"){
+    const links=$$(".mobile-links a",menu);
+    const i=links.indexOf(document.activeElement);
+    e.preventDefault();
+    const n=e.shiftKey?(i<=0?links.length-1:i-1):(i+1)%links.length;
+    links[n].focus();
+  }
+});
 $$(".mobile-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();setMenu(false);scrollTo(a.getAttribute("href"));}));
 $$(".nav-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();scrollTo(a.getAttribute("href"));}));
 
@@ -135,7 +149,23 @@ $$("main section[data-frame]").forEach(sec=>{
 /* ---------- ticker + edge print ---------- */
 const tickerItems="35MM <i>·</i> ƒ/1.8 <i>·</i> ISO 400 <i>·</i> TASVEER <i>·</i> IIIT DELHI <i>·</i> SHOOT FIRST <i>·</i> DEVELOP LATER <i>·</i> ";
 $("#tickerTrack").innerHTML=`<span>${tickerItems.repeat(4)}</span><span>${tickerItems.repeat(4)}</span>`;
-if(hasGsap&&!reduced) gsap.to("#tickerTrack",{xPercent:-50,duration:36,ease:"none",repeat:-1});
+let tickerTween=null;
+if(hasGsap&&!reduced) tickerTween=gsap.to("#tickerTrack",{xPercent:-50,duration:36,ease:"none",repeat:-1});
+
+/* ---------- ambient motion toggle (WCAG 2.2.2) ---------- */
+let motionOn=localStorage.getItem("tasveer_motion")!=="off";
+const motionBtn=$("#motionToggle");
+function applyMotion(){
+  document.body.classList.toggle("calm",!motionOn);
+  motionBtn.setAttribute("aria-pressed",String(motionOn));
+  if(tickerTween) motionOn?tickerTween.play():tickerTween.pause();
+}
+motionBtn.addEventListener("click",()=>{
+  motionOn=!motionOn;
+  localStorage.setItem("tasveer_motion",motionOn?"on":"off");
+  applyMotion();
+});
+applyMotion();
 const edge="TASVEER 400C ▸ COLOR ▸ PROCESS BEFORE 2027 ▸ ";
 $$(".strip-edgeprint").forEach(el=>el.textContent=edge.repeat(8));
 
@@ -157,29 +187,40 @@ const shootPool=[
 function ejectPolaroid(item){
   const fig=document.createElement("figure");
   fig.className="tray-polaroid";
-  fig.innerHTML=`<img src="${item.src}" alt="Your shot: ${item.cap}"><figcaption>${item.cap}</figcaption>`;
+  fig.innerHTML=`<img src="${esc(item.src)}" alt="Your shot: ${esc(item.cap)}"><figcaption>${esc(item.cap)}</figcaption>`;
   fig.addEventListener("click",ev=>{ev.stopPropagation();openLightbox([item],0);});
   tray.appendChild(fig);
   if(hasGsap&&!reduced){
     gsap.fromTo(fig,{yPercent:150,y:0,rotate:rand(-14,14)},{yPercent:0,y:0,rotate:rand(-4,4),duration:.9,ease:"back.out(1.6)"});
   }
-  while(tray.children.length>CONFIG.traySize){
-    const old=tray.firstElementChild;
+  // bound the tray WITHOUT async removal inside the loop (freeze bug):
+  // mark leaving prints absolute (out of flex flow) and remove on animation end.
+  const active=[...tray.children].filter(c=>!c.classList.contains("leaving"));
+  while(active.length>CONFIG.traySize){
+    const old=active.shift();
+    old.classList.add("leaving");
+    old.style.pointerEvents="none";
     if(hasGsap&&!reduced){
+      old.style.position="absolute"; old.style.bottom="0";
       gsap.to(old,{yPercent:160,opacity:0,duration:.45,ease:"power2.in",onComplete:()=>old.remove()});
-      old.style.pointerEvents="none";
-      if(tray.children.length>CONFIG.traySize+2) old.remove();
     } else old.remove();
   }
 }
+let lastFlash=0;
 function shoot(){
   if(exp>=CONFIG.maxExposures){exp=0;roll++;toast(`ROLL ${String(roll-1).padStart(3,"0")} COMPLETE — FRESH ROLL LOADED`);}
   exp++; paintCounter(); shutterSound();
-  if(hasGsap&&!reduced){
-    gsap.fromTo(flash,{opacity:.85},{opacity:0,duration:.4,ease:"power2.out"});
+  const now=performance.now();
+  if(hasGsap&&!reduced&&now-lastFlash>250){
+    lastFlash=now;
+    gsap.fromTo(flash,{opacity:.6},{opacity:0,duration:.4,ease:"power2.out"});
     gsap.fromTo(".hero-word",{scale:1.012},{scale:1,duration:.5,ease:"elastic.out(1,.5)"});
   }
   ejectPolaroid(pick(shootPool));
+  if(exp===1 && !sessionStorage.getItem("tasveer_first_shot")){
+    sessionStorage.setItem("tasveer_first_shot","1");
+    setTimeout(()=>toast("NICE SHOT — IT LANDED IN YOUR TRAY ↓ TAP IT TO INSPECT.",3200),900);
+  }
   if(exp===3 && !sessionStorage.getItem("tasveer_egg_hint")){
     sessionStorage.setItem("tasveer_egg_hint","1");
     setTimeout(()=>toast("THE APERTURE LOGO KEEPS A SECRET — FIVE CLICKS.",3400),1200);
@@ -214,12 +255,12 @@ GALLERY.forEach((g,i)=>{
   b.setAttribute("aria-label",`Open frame ${i+1}: ${g.cap}`);
   b.innerHTML=`
     <div class="frame-img-wrap">
-      <img src="${g.src}" alt="${g.cap}" loading="lazy">
+      <img src="${esc(g.src)}" alt="${esc(g.cap)}" loading="lazy">
       <div class="frame-fluid"></div>
       <span class="frame-tag">DEVELOPING 0:00</span>
       <span class="frame-num">FR ${String(i+1).padStart(2,"0")} ▸</span>
     </div>
-    <p class="frame-cap mono">${g.cap}</p>`;
+    <p class="frame-cap mono">${esc(g.cap)}</p>`;
   b.addEventListener("click",()=>openLightbox(GALLERY,i));
   b.addEventListener("mouseenter",()=>developFrame(b));
   stripFrames.appendChild(b);
@@ -258,7 +299,12 @@ function nativeStrip(){
   $$(".frame").forEach(f=>f.style.scrollSnapAlign="center");
   const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)developFrame(en.target);}),{root:stripViewport,threshold:.5});
   $$(".frame:not(.frame-empty)").forEach(f=>io.observe(f));
-  return ()=>io.disconnect();
+  return ()=>{
+    io.disconnect();
+    stripViewport.style.overflowX="";
+    stripViewport.style.scrollSnapType="";
+    $$(".frame").forEach(f=>f.style.scrollSnapAlign="");
+  };
 }
 if(hasGsap&&!reduced){
   const mm=gsap.matchMedia();
@@ -272,6 +318,16 @@ if(hasGsap&&!reduced){
   });
   mm.add("(max-width: 900px)",()=>nativeStrip());
 } else nativeStrip();
+
+/* first-arrival swipe cue on touch */
+if(hasGsap){
+  ScrollTrigger.create({trigger:".gallery",start:"top 70%",once:true,onEnter:()=>{
+    if(matchMedia("(pointer: coarse)").matches && !sessionStorage.getItem("tasveer_swipe_cue")){
+      sessionStorage.setItem("tasveer_swipe_cue","1");
+      toast("SWIPE THE ROLL → FRAMES DEVELOP AS THEY PASS.",3000);
+    }
+  }});
+}
 
 /* keyboard: bring focused frames into view (pinned strip + native strip) */
 stripFrames.addEventListener("focusin",e=>{
@@ -290,12 +346,13 @@ stripFrames.addEventListener("focusin",e=>{
 
 /* ---------- lightbox ---------- */
 const lb=$("#lightbox"),lbImg=$("#lbImg"),lbCap=$("#lbCap");
-let lbItems=[],lbIndex=0,lbLastFocus=null;
+let lbItems=[],lbIndex=0,lbLastFocus=null,lbHideTimer=null;
 function openLightbox(items,index){
+  clearTimeout(lbHideTimer);
   lbItems=items;lbIndex=index;lbLastFocus=document.activeElement;
   paintLb(); lb.hidden=false;
   requestAnimationFrame(()=>lb.classList.add("show"));
-  if(lenis)lenis.stop();
+  if(lenis)lenis.stop(); else document.body.style.overflow="hidden";
   $("#lbClose").focus();
 }
 function paintLb(){
@@ -306,8 +363,9 @@ function paintLb(){
 }
 function closeLightbox(){
   lb.classList.remove("show");
-  setTimeout(()=>{lb.hidden=true;},300);
-  if(lenis)lenis.start();
+  clearTimeout(lbHideTimer);
+  lbHideTimer=setTimeout(()=>{lb.hidden=true;},300);
+  if(lenis)lenis.start(); else document.body.style.overflow="";
   lbLastFocus?.focus?.();
 }
 $("#lbClose").addEventListener("click",closeLightbox);
@@ -333,8 +391,10 @@ const wall=$("#polaroidWall"),filters=$("#crewFilters");
 DEPTS.forEach(([key,label],i)=>{
   const c=document.createElement("button");
   c.className="chip"+(i===0?" active":""); c.textContent=label; c.dataset.dept=key;
+  c.setAttribute("aria-pressed",String(i===0));
   c.addEventListener("click",()=>{
-    $$(".chip").forEach(x=>x.classList.remove("active")); c.classList.add("active");
+    $$(".chip").forEach(x=>{x.classList.remove("active");x.setAttribute("aria-pressed","false");});
+    c.classList.add("active"); c.setAttribute("aria-pressed","true");
     $$(".polaroid").forEach(p=>{
       const show=key==="all"||p.dataset.dept===key;
       p.classList.toggle("filtered-out",!show);
@@ -352,21 +412,21 @@ TEAM.forEach((t,i)=>{
   b.style.setProperty("--rot",`${((i*7)%9)-4}deg`);
   b.style.setProperty("--tape-rot",`${i%2?-3:2}deg`);
   const frontPhoto=t.img
-    ?`<img src="assets/team/${t.img}" alt="Portrait of ${t.name}" loading="lazy">`
+    ?`<img src="assets/team/${esc(t.img)}" alt="Portrait of ${esc(t.name)}" loading="lazy">`
     :`<div class="photo-pending"><span class="aperture-big">◉</span><span>AWAITING EXPOSURE</span></div>`;
   let back;
   if(t.child){
     back=`<div class="polaroid-face polaroid-back">
-      <div class="polaroid-photo"><img src="assets/team/${t.child}" alt="${t.name} as a kid" loading="lazy"></div>
-      <p class="polaroid-back-cap">${t.backCap||"frame zero — before Tasveer had a name"}<small>FRAME 00 · ${t.name} · 400C</small></p></div>`;
+      <div class="polaroid-photo"><img src="assets/team/${esc(t.child)}" alt="${esc(t.name)} as a kid" loading="lazy"></div>
+      <p class="polaroid-back-cap">${esc(t.backCap||"frame zero — before Tasveer had a name")}<small>FRAME 00 · ${esc(t.name)} · 400C</small></p></div>`;
   } else if(t.back?.type==="quote"){
-    back=`<div class="polaroid-face polaroid-back"><div class="quote-back"><p>“${t.back.text}”</p><small>${t.back.tag}</small></div></div>`;
+    back=`<div class="polaroid-face polaroid-back"><div class="quote-back"><p>“${esc(t.back.text)}”</p><small>${esc(t.back.tag)}</small></div></div>`;
   } else {
-    back=`<div class="polaroid-face polaroid-back"><div class="quote-back"><p>“${t.name} — ${t.role}.”</p><small>frame pending</small></div></div>`;
+    back=`<div class="polaroid-face polaroid-back"><div class="quote-back"><p>“${esc(t.name)} — ${esc(t.role)}.”</p><small>frame pending</small></div></div>`;
   }
   b.innerHTML=`<div class="polaroid-inner">
     <div class="polaroid-face polaroid-front"><div class="polaroid-photo">${frontPhoto}</div>
-    <div class="polaroid-meta"><p class="polaroid-name">${t.name}</p><p class="polaroid-role">${t.role}</p></div></div>${back}</div>`;
+    <div class="polaroid-meta"><p class="polaroid-name">${esc(t.name)}</p><p class="polaroid-role">${esc(t.role)}</p></div></div>${back}</div>`;
   b.addEventListener("click",()=>{
     b.classList.toggle("flipped");
     b.setAttribute("aria-pressed",String(b.classList.contains("flipped")));

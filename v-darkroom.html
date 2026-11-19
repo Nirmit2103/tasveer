@@ -55,6 +55,9 @@
     <button id="soundToggle" class="sound-toggle mono" aria-pressed="true" aria-label="Toggle shutter sound" data-cursor="SOUND">
       <span class="sound-on">SND ◉</span><span class="sound-off">SND ○</span>
     </button>
+    <button id="motionToggle" class="sound-toggle mono" aria-pressed="true" aria-label="Pause ambient motion (blinking, marquee, grain)" data-cursor="MOTION">
+      <span class="sound-on">MOT ◉</span><span class="sound-off">MOT ○</span>
+    </button>
     <button class="nav-burger" id="burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
   </div>
 </header>
@@ -83,7 +86,7 @@
   <!-- FR 01 · VIEWFINDER -->
   <section class="hero" id="hero" data-frame="01" data-section="VIEWFINDER">
     <div class="hero-photo" aria-hidden="true">
-      <img src="assets/gallery/frame-03.webp" alt="">
+      <img src="assets/gallery/frame-03.webp" alt="" width="1200" height="800" fetchpriority="high">
       <div class="hero-duotone"></div>
     </div>
     <div class="vf-corners" aria-hidden="true">
@@ -102,7 +105,7 @@
     </div>
 
     <div class="hero-shoot mono">
-      <span class="shoot-hint">CLICK ANYWHERE TO SHOOT</span>
+      <span class="shoot-hint"><span class="hint-desktop">CLICK ANYWHERE TO SHOOT</span><span class="hint-touch">TAP ANYWHERE TO SHOOT</span></span>
       <span class="shoot-count">EXP <span id="expCount">00</span>/36 · ROLL <span id="rollCount">001</span></span>
     </div>
     <div class="hero-scroll mono" aria-hidden="true">SCROLL TO DEVELOP <span class="scroll-arrow">↓</span></div>
@@ -176,7 +179,7 @@
       <a class="btn-magnetic" id="joinBtn" href="mailto:tasveer@sc.iiitd.ac.in?subject=I%20want%20to%20join%20Tasveer" data-cursor="SEND"><span class="btn-inner mono">WRITE TO US →</span></a>
       <a class="btn-ghost mono" id="instaBtn" href="#" data-cursor="FOLLOW" hidden>INSTAGRAM ↗</a>
     </div>
-    <p class="join-note">send: your name, year, and what you like making — <em>no portfolio needed.</em></p>
+    <p class="join-note">send: your name, year, and what you like making — <em>no portfolio needed.</em> we reply before the next roll.</p>
     <a class="join-mail mono" href="mailto:tasveer@sc.iiitd.ac.in?subject=I%20want%20to%20join%20Tasveer">tasveer@sc.iiitd.ac.in</a>
   </section>
 </main>
@@ -190,6 +193,7 @@
     <span>THE MEDIA SOCIETY OF IIIT DELHI</span>
     <span>OKHLA PHASE III · NEW DELHI</span>
     <span>© 2026 TASVEER · SHOT &amp; DEVELOPED BY THE CREW</span>
+    <span class="footer-whisper">the aperture remembers five clicks.</span>
   </div>
 </footer>
 
@@ -203,9 +207,9 @@
 <div class="toast mono" id="toast" role="status"></div>
 <noscript><p style="padding:2rem;font-family:monospace">This site is a camera. Enable JavaScript to shoot.</p></noscript>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="js/vendor/gsap.min.js"></script>
+<script src="js/vendor/ScrollTrigger.min.js"></script>
+<script src="js/vendor/lenis.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/darkroom.js"></script>
 </body>
