@@ -48,8 +48,11 @@ body.calm .grain{animation:none}
 
 /* scroll progress pill — the blue secret */
 .progress-pill{position:fixed;right:.9vw;top:50%;transform:translateY(-50%);z-index:140;
-  width:5px;height:16vh;border-radius:99px;background:var(--line);overflow:hidden;padding:0}
-.progress-pill .fill{position:absolute;inset:0;background:var(--blue);transform-origin:top;transform:scaleY(0)}
+  width:5px;height:16vh;border-radius:99px;background:var(--line);padding:0;cursor:pointer}
+.progress-pill::before{content:"";position:absolute;top:-12px;bottom:-12px;left:-20px;right:-6px}
+.progress-pill .fill{position:absolute;inset:0;border-radius:99px;background:var(--blue);transform-origin:top;transform:scaleY(0)}
+.hint-tap{display:none}
+@media (pointer:coarse){.hint-click{display:none}.hint-tap{display:inline}}
 body.daylight .progress-pill .fill{background:var(--blue)}
 .progress-pill:hover{width:7px}
 
