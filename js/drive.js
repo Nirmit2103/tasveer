@@ -84,13 +84,13 @@ function setMenu(open){
   burger.setAttribute("aria-expanded", String(open));
   menu.classList.toggle("open", open);
   menu.setAttribute("aria-hidden", String(!open));
+  document.body.style.overflow = open ? "hidden" : "";
   if (lenis) open ? lenis.stop() : lenis.start();
-  else document.body.style.overflow = open ? "hidden" : "";
   if (open){
     const tryFocus=(n)=>{
       const a=$(".menu-links a", menu);
-      if (a && getComputedStyle(a).visibility==="visible") a.focus();
-      else if (n<12) setTimeout(()=>tryFocus(n+1), 30);
+      if (a){ a.focus(); if (document.activeElement===a) return; }
+      if (n<20) setTimeout(()=>tryFocus(n+1), 30);
     };
     setTimeout(()=>tryFocus(0), 30);
   }
@@ -108,7 +108,12 @@ menu.addEventListener("keydown", e=>{
   f[(e.shiftKey ? (i<=0 ? f.length-1 : i-1) : (i+1) % f.length)].focus();
 });
 $$(".menu-links a").forEach(a=>a.addEventListener("click", e=>{
-  e.preventDefault(); setMenu(false); goTo(a.getAttribute("href"));
+  e.preventDefault();
+  const href=a.getAttribute("href");
+  setMenu(false);
+  goTo(href);
+  const target=$(href);
+  if (target){ target.setAttribute("tabindex","-1"); target.focus({preventScroll:true}); }
 }));
 
 /* ---------- marquees: duration proportional to content ---------- */
