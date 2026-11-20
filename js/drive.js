@@ -89,7 +89,7 @@ function setMenu(open){
   if (open){
     const tryFocus=(n)=>{
       const a=$(".menu-links a", menu);
-      if (a && getComputedStyle(menu).visibility==="visible") a.focus();
+      if (a && getComputedStyle(a).visibility==="visible") a.focus();
       else if (n<12) setTimeout(()=>tryFocus(n+1), 30);
     };
     setTimeout(()=>tryFocus(0), 30);
@@ -133,7 +133,7 @@ const bandImgs = [
   [A+"friends-night.webp","the after-party"],[A+"confetti.webp","closing night"],
 ];
 const tileCls = ["t-a","t-b","t-c"];
-const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="${esc(im[1])}" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
+const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
 buildMarquee($("#photoBand"), bandHTML, {invert:true, secPerItem:4, pauseHover:true});
 
 /* ---------- hero wordmark: photo crossfade layers ---------- */
@@ -196,11 +196,11 @@ ROLL.forEach((beat,i)=>{
       <span class="beat-count">${beat.count} FRAMES</span>
       <span class="beat-plus" aria-hidden="true">+</span>
     </button>
-    <div class="beat-panel" id="${panelId}" role="region" aria-label="${esc(beat.name)} frames">
+    <div class="beat-panel" id="${panelId}" role="region" aria-label="${esc(beat.name)} frames" aria-hidden="true">
       <div class="beat-panel-inner">
         <p class="beat-note">${esc(beat.note)}</p>
         <div class="beat-frames">
-          ${beat.frames.map(f=>`<figure class="beat-frame" data-cursor="VIEW"><div class="imgwrap"><img src="${esc(f[0])}" alt="${esc(f[1])}" loading="lazy"></div><figcaption class="mono">${esc(f[1])}</figcaption></figure>`).join("")}
+          ${beat.frames.map(f=>`<figure class="beat-frame" data-cursor="VIEW"><div class="imgwrap"><img src="${esc(f[0])}" alt="" loading="lazy"></div><figcaption class="mono">${esc(f[1])}</figcaption></figure>`).join("")}
         </div>
       </div>
     </div>`;
@@ -208,6 +208,7 @@ ROLL.forEach((beat,i)=>{
   row.addEventListener("click", ()=>{
     const open = sec.classList.toggle("open");
     row.setAttribute("aria-expanded", String(open));
+    $(".beat-panel", sec).setAttribute("aria-hidden", String(!open));
     if (open && hasGsap && !reduced){
       gsap.fromTo($$(".beat-frame", sec), {opacity:0, y:24}, {opacity:1, y:0, duration:.6, stagger:.07, ease:"power3.out", delay:.15});
     }
@@ -287,7 +288,10 @@ $("#progressPill").addEventListener("click", ()=>{
 let motionOn = localStorage.getItem("tasveer_drive_motion") !== "off";
 function applyMotion(){
   document.body.classList.toggle("calm", !motionOn);
-  $$("[data-motion-toggle]").forEach(b=>b.setAttribute("aria-pressed", String(motionOn)));
+  $$("[data-motion-toggle]").forEach(b=>{
+    b.setAttribute("aria-pressed", String(motionOn));
+    b.textContent = motionOn ? "MOTION ◉" : "MOTION ○";
+  });
   if (wordCycle) motionOn ? wordCycle.play() : wordCycle.pause();
 }
 $$("[data-motion-toggle]").forEach(b=>b.addEventListener("click", ()=>{
