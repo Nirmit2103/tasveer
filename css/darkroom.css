@@ -16,9 +16,8 @@
   --ease-out:cubic-bezier(.22,1,.36,1); --ease-snap:cubic-bezier(.7,0,.2,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
 html.lenis,html.lenis body{height:auto}
-.lenis.lenis-smooth{scroll-behavior:auto!important}
+html.lenis{scroll-behavior:auto!important}
 body{
   background:var(--bg); color:var(--ink);
   font-family:var(--font-body); font-size:1.125rem; line-height:1.6;
@@ -176,7 +175,7 @@ body.has-cursor .cursor{opacity:1}
 .hud-af::before{top:0;left:0;border-top-width:1.5px;border-left-width:1.5px}
 .hud-af::after{bottom:0;right:0;border-bottom-width:1.5px;border-right-width:1.5px}
 .hud-af span{position:absolute;top:-1.3rem;left:0;font-family:var(--font-mono);font-size:.52rem;letter-spacing:.2em;color:var(--amber)}
-.hero-shoot{position:absolute;right:var(--pad);bottom:calc(var(--pad) + 4.6rem);display:flex;flex-direction:column;align-items:flex-end;gap:.45rem;z-index:3}
+.hero-shoot{position:absolute;right:var(--pad);bottom:calc(var(--pad) + 4.6rem);display:flex;flex-direction:column;align-items:flex-end;gap:.45rem;z-index:3;padding-right:6px}
 .shoot-hint{color:var(--amber);animation:hintPulse 2.6s ease-in-out infinite}
 @keyframes hintPulse{50%{opacity:.45}}
 .shoot-btn{color:var(--bg);background:var(--amber);padding:.55rem 1rem;min-height:44px;font-weight:700;font-size:.62rem;letter-spacing:.14em;transition:background .2s}

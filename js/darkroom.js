@@ -17,9 +17,11 @@ function toast(msg,ms=2600){
   clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),ms);
 }
 
-/* smooth scroll */
+/* smooth scroll — desktop wheel only; native touch scroll on phones
+   (Lenis's non-passive touch listeners freeze nested horizontal panning) */
 let lenis=null;
-if (hasGsap && !reduced && typeof Lenis!=="undefined"){
+const coarsePointer = matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints>0;
+if (hasGsap && !reduced && !coarsePointer && typeof Lenis!=="undefined"){
   lenis=new Lenis({lerp:.09});
   lenis.on("scroll",ScrollTrigger.update);
   gsap.ticker.add(t=>lenis.raf(t*1000));
@@ -145,7 +147,12 @@ $$(".nav-links a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();
 const railFrame=$("#railFrame"),railSection=$("#railSection");
 $$("main section[data-frame]").forEach(sec=>{
   if(!hasGsap) return;
-  ScrollTrigger.create({trigger:sec,start:"top 55%",end:"bottom 55%",
+  const isGallery = sec.classList.contains("gallery");
+  ScrollTrigger.create({trigger:sec,start:"top 55%",
+    end: isGallery ? ()=>{
+      const pinST=ScrollTrigger.getAll().find(t=>t.trigger===sec && t.pin);
+      return pinST ? pinST.end : "bottom 55%";
+    } : "bottom 55%",
     onToggle(self){ if(self.isActive){railFrame.textContent=sec.dataset.frame;railSection.textContent=sec.dataset.section;} }});
 });
 
@@ -323,7 +330,7 @@ if(hasGsap&&!reduced){
     stripViewport.scrollLeft=0;
     const dist=()=>Math.max(0,strip.scrollWidth-stripViewport.clientWidth);
     const tween=gsap.to(strip,{x:()=>-dist(),ease:"none",
-      scrollTrigger:{trigger:".gallery",start:"top top",end:()=>"+="+(dist()+innerHeight*.4),pin:true,scrub:.6,invalidateOnRefresh:true,onUpdate:developVisibleFrames}});
+      scrollTrigger:{trigger:".gallery",start:"top top",end:()=>"+="+(dist()+innerHeight*.4),pin:true,scrub:.6,invalidateOnRefresh:true,refreshPriority:1,onUpdate:developVisibleFrames}});
     const off=()=>lenis?.off("scroll",developVisibleFrames);
     lenis?.on("scroll",developVisibleFrames);
     return ()=>{off();tween.scrollTrigger?.kill();tween.kill();gsap.set(strip,{x:0});};
@@ -429,7 +436,11 @@ DEPTS.forEach(([key,label],i)=>{
       p.classList.toggle("filtered-out",!show);
       if(show&&hasGsap&&!reduced)gsap.fromTo(p,{opacity:0,y:18},{opacity:1,y:0,duration:.5,ease:"power3.out"});
     });
-    if(hasGsap) ScrollTrigger.refresh();
+    if(hasGsap){
+      if(lenis)lenis.stop();
+      ScrollTrigger.refresh();
+      if(lenis)lenis.start();
+    }
   });
   filters.appendChild(c);
 });
@@ -501,4 +512,12 @@ $("#logoBtn").addEventListener("click",()=>{
 });
 
 let rT;
-addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>{if(hasGsap)ScrollTrigger.refresh();},250);});
+addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>{
+  if(hasGsap){
+    if(lenis){lenis.resize();lenis.stop();}
+    ScrollTrigger.refresh();
+    if(lenis)lenis.start();
+  }
+},200);});
+/* order triggers so the gallery pin's spacer is accounted for by later sections */
+if(hasGsap) ScrollTrigger.sort();
