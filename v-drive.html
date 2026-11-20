@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TASVEER — The Media Society of IIIT Delhi</title>
+<meta name="description" content="Tasveer is IIIT Delhi's media society. Every story is in our backyard — we shoot, film, design and archive the campus's memory.">
+<meta property="og:title" content="TASVEER — The Media Society of IIIT Delhi">
+<meta property="og:description" content="Every event ends. The frame doesn't.">
+<meta property="og:image" content="assets/og.jpg">
+<meta name="theme-color" content="#050505">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/drive.css">
+</head>
+<body>
+
+<a class="skip-link" href="#story">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="cursor" id="cursor" aria-hidden="true">
+  <span class="cursor-dot"></span><span class="cursor-label" style="display:none"></span>
+</div>
+
+<button class="progress-pill" id="progressPill" aria-label="Scroll progress. Click three times for a secret.">
+  <span class="fill" id="progressFill"></span>
+</button>
+
+<header class="nav" id="nav">
+  <a class="nav-logo" href="#top" data-goto="#top" aria-label="Tasveer — back to top">
+    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M4 10V4h6M22 4h6v6M28 22v6h-6M10 28H4v-6" stroke="currentColor" stroke-width="2.4"/>
+      <circle cx="16" cy="16" r="5.2" fill="currentColor"/>
+    </svg>
+    <span class="nav-word">TASVEER</span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-tag mono">IIIT DELHI · EST. 2016</span>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="nav-bluebar" aria-hidden="true"></span>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true">
+  <button class="menu-close" id="menuClose" aria-label="Close menu">✕</button>
+  <nav class="menu-links">
+    <a href="#top" data-goto="#top"><span class="num">01</span> THE BACKYARD</a>
+    <a href="#roll"><span class="num">02</span> THE ROLL</a>
+    <a href="#story"><span class="num">03</span> OUR STORY</a>
+    <a href="#crew"><span class="num">04</span> THE CREW</a>
+    <a href="#open-call"><span class="num">05</span> OPEN CALL</a>
+  </nav>
+  <div class="menu-foot mono">
+    <a href="mailto:tasveer@sc.iiitd.ac.in">TASVEER@SC.IIITD.AC.IN</a>
+    <button data-motion-toggle aria-pressed="true" aria-label="Ambient motion">MOTION ◉</button>
+    <span>OKHLA · NEW DELHI · 28.5°N</span>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- 01 · hero -->
+<section class="hero" id="top" data-frame="01" data-section="THE BACKYARD">
+  <div class="hero-head">
+    <h1 class="hero-title">
+      <span class="mask"><span>EVERY STORY IS</span></span>
+      <span class="mask"><span>IN OUR BACKYARD</span></span>
+    </h1>
+    <p class="hero-kicker mono">TASVEER · THE MEDIA SOCIETY OF IIIT DELHI</p>
+  </div>
+  <div class="hero-scroll mono" aria-hidden="true">SCROLL <span class="arrow">↓</span></div>
+  <div class="hero-marquee marquee" id="heroMarquee" aria-hidden="true"></div>
+  <div class="hero-word-wrap" id="heroWordWrap" aria-label="TASVEER"></div>
+</section>
+
+<!-- photo band -->
+<div class="photo-band marquee" id="photoBand" aria-label="A scrolling strip of frames from the society's archive"></div>
+
+<!-- 03 · story -->
+<section class="story" id="story">
+  <div class="story-grid">
+    <div class="story-left">
+      <h2 class="section-title">OUR<br>STORY</h2>
+      <a class="pill" href="#roll" data-goto="#roll">VIEW THE ROLL <span class="arr">→</span></a>
+    </div>
+    <div class="story-right">
+      <p class="story-body">Every event ends. The frame doesn't. Tasveer is IIIT Delhi's media society — the crew that shows up with cameras when the campus makes a memory, and makes sure it outlives the moment.</p>
+      <p class="story-body">We shoot, film, design and archive. Not for the feed — for the record. The campus's story, told by the people who live it.</p>
+    </div>
+  </div>
+  <div class="collage">
+    <figure class="c-small">
+      <img src="assets/drive/film-camera.webp" alt="A film camera, glass and dials" loading="lazy">
+      <figcaption class="mono">THE TOOLS · 35MM &amp; DIGITAL</figcaption>
+    </figure>
+    <figure class="c-big">
+      <img src="assets/drive/students.webp" alt="Students working together on campus" loading="lazy">
+      <figcaption class="mono">THE BACKYARD · OKHLA PHASE III</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 02 · the roll -->
+<section class="roll" id="roll">
+  <div class="roll-head">
+    <h2 class="section-title">THE ROLL</h2>
+    <span class="mono">SELECTED FRAMES · 2025–26 · SIX BEATS</span>
+  </div>
+  <div id="rollList"></div>
+  <div class="roll-more">
+    <a class="pill" href="mailto:tasveer@sc.iiitd.ac.in?subject=Send%20me%20the%20full%20archive">FULL ARCHIVE ON REQUEST <span class="arr">→</span></a>
+  </div>
+</section>
+
+<!-- giant beat marquee -->
+<div class="beat-marquee marquee" id="beatMarquee" aria-hidden="true"></div>
+
+<!-- 04 · crew -->
+<section class="crew" id="crew">
+  <div class="crew-head">
+    <h2 class="section-title">THE<br>CREW</h2>
+    <p>Sixteen frames behind the lens. One society. Click a portrait — everyone was a kid once.</p>
+  </div>
+  <div class="crew-filters" id="crewFilters" role="group" aria-label="Filter crew by department"></div>
+  <div class="crew-grid" id="crewGrid"></div>
+</section>
+
+<!-- 05 · open call -->
+<section class="open-call" id="open-call">
+  <svg class="iso" viewBox="0 0 400 300" fill="none" aria-hidden="true">
+    <g stroke="currentColor" stroke-width="1">
+      <path d="M60 200 L200 130 L340 200 L200 270 Z"/>
+      <path d="M60 200 L60 170 L200 100 L340 170 L340 200"/>
+      <path d="M200 100 L200 130"/>
+      <path d="M100 180 L200 130 L300 180"/>
+      <path d="M120 210 L200 170 L280 210"/>
+      <rect x="150" y="150" width="24" height="14" transform="skewY(-26.5) translate(0 60)"/>
+      <path d="M200 270 L200 240"/>
+      <path d="M40 240 L120 280 M320 240 L240 280"/>
+      <circle cx="200" cy="130" r="4" fill="currentColor"/>
+      <circle cx="60" cy="200" r="3" fill="currentColor"/>
+      <circle cx="340" cy="200" r="3" fill="currentColor"/>
+      <circle cx="200" cy="270" r="3" fill="currentColor"/>
+      <path d="M200 60 L200 92 M170 70 L185 95 M230 70 L215 95"/>
+    </g>
+  </svg>
+  <h2 class="open-call-title">BUILD THE ARCHIVE WITH US.</h2>
+  <p class="open-call-sub">No portfolio needed. Send your name, year, and what you like making — we reply before the next roll.</p>
+  <div class="open-call-ctas">
+    <a class="pill" href="mailto:tasveer@sc.iiitd.ac.in?subject=I%20want%20to%20join%20Tasveer">WRITE TO US <span class="arr">→</span></a>
+    <span class="mono">TASVEER@SC.IIITD.AC.IN</span>
+  </div>
+  <p class="open-call-note mono">SHOOTERS · EDITORS · DESIGNERS · WRITERS · <em>PEOPLE WHO NOTICE THINGS</em></p>
+</section>
+
+</main>
+
+<!-- footer panel -->
+<footer class="footer-panel">
+  <h2 class="footer-statement">THE CAMPUS REMEMBERS BECAUSE WE SHOOT IT.</h2>
+  <div class="footer-grid">
+    <form class="subscribe" id="subscribeForm">
+      <span class="mono">SUBSCRIBE TO THE ROLL — ONE EMAIL PER EVENT</span>
+      <div class="subscribe-row">
+        <input id="subscribeEmail" type="email" placeholder="YOUR@EMAIL.COM" aria-label="Your email address">
+        <button class="subscribe-go" type="submit" aria-label="Subscribe by email">→</button>
+      </div>
+      <p class="subscribe-note mono">OPENS YOUR MAIL APP · NO TRACKING · NO SPAM</p>
+    </form>
+    <div class="footer-links">
+      <ul>
+        <li><a href="#roll" data-goto="#roll">THE ROLL</a></li>
+        <li><a href="#story" data-goto="#story">OUR STORY</a></li>
+        <li><a href="#crew" data-goto="#crew">THE CREW</a></li>
+        <li><a href="#open-call" data-goto="#open-call">OPEN CALL</a></li>
+      </ul>
+      <ul>
+        <li><a href="mailto:tasveer@sc.iiitd.ac.in">CONTACT</a></li>
+        <li><a id="instaLink" href="#" hidden>INSTAGRAM</a></li>
+        <li><a href="https://github.com/breaking-byts/tasveer" target="_blank" rel="noopener">SOURCE</a></li>
+        <li><button data-motion-toggle aria-pressed="true" aria-label="Ambient motion">MOTION ◉</button></li>
+      </ul>
+    </div>
+  </div>
+  <svg class="footer-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <path d="M4 10V4h6M22 4h6v6M28 22v6h-6M10 28H4v-6" stroke="currentColor" stroke-width="1.6"/>
+    <circle cx="16" cy="16" r="5.2" fill="currentColor"/>
+  </svg>
+  <p class="footer-whisper">the blue pill keeps a secret.</p>
+</footer>
+
+<!-- cream strip -->
+<div class="cream-strip">
+  <div class="cream-top">
+    <div class="socials">
+      <a id="instaSocial" href="mailto:tasveer@sc.iiitd.ac.in" aria-label="Email Tasveer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+      </a>
+      <a href="https://github.com/breaking-byts/tasveer" target="_blank" rel="noopener" aria-label="Tasveer on GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85V21c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+      </a>
+    </div>
+    <div class="cream-legal">
+      <a href="https://github.com/breaking-byts/tasveer" target="_blank" rel="noopener">SOURCE ON GITHUB</a>
+      <a href="mailto:tasveer@sc.iiitd.ac.in">TASVEER@SC.IIITD.AC.IN</a>
+    </div>
+    <span class="cream-copy">©<span id="year">2026</span> TASVEER</span>
+  </div>
+  <p class="cream-address">IIIT DELHI · OKHLA PHASE III · NEW DELHI 110020 · 28.5°N 77.2°E</p>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="js/data.js"></script>
+<script src="js/vendor/gsap.min.js"></script>
+<script src="js/vendor/ScrollTrigger.min.js"></script>
+<script src="js/vendor/lenis.min.js"></script>
+<script src="js/drive.js"></script>
+</body>
+</html>
