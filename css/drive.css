@@ -97,7 +97,7 @@ body.daylight .burger span{background:var(--cream)}
 .hero-word-wrap{position:absolute;left:0;right:0;bottom:-3.8vw;z-index:2;line-height:.78;pointer-events:none;text-align:center}
 .hero-word{font-weight:500;font-stretch:62%;text-transform:uppercase;font-size:34.5vw;letter-spacing:.005em;
   white-space:nowrap;display:block;width:max-content;position:relative;left:50%;transform:translateX(-50%);
-  color:transparent;
+  color:transparent;background-color:#2E2C28;
   -webkit-background-clip:text;background-clip:text;background-size:cover;background-position:center 30%;
   filter:var(--warm-mono)}
 .hero-word.layer{position:absolute;top:0;left:50%;transform:translateX(-50%);opacity:0}
@@ -121,8 +121,8 @@ body.calm .marquee-track,.marquee:hover .marquee-track.pause-hover{animation-pla
 
 /* image marquee band */
 .photo-band{padding:9vh 0 7vh;overflow:hidden}
-.photo-band .marquee-track{gap:1.1vw;align-items:flex-end}
-.photo-tile{flex:none;width:19vw;overflow:hidden}
+.photo-band .marquee-track{align-items:flex-end}
+.photo-tile{flex:none;width:19vw;overflow:hidden;margin-right:1.1vw}
 .photo-tile img{width:100%;height:100%;object-fit:cover;filter:var(--warm-mono);transition:filter .7s}
 .photo-tile:hover img{filter:none}
 .photo-tile.t-a{height:24vw}.photo-tile.t-b{height:30vw}.photo-tile.t-c{height:20vw}
@@ -220,7 +220,7 @@ body.daylight .member .tag{background:rgba(241,240,234,.88);color:#0A0A0A}
 
 /* footer panel — rounded bottom, statement + subscribe + links */
 .footer-panel{background:var(--coal);border-radius:0 0 4vw 4vw;padding:12vh var(--margin) 8vh;position:relative;overflow:hidden}
-.footer-statement{font-weight:700;font-stretch:75%;text-transform:uppercase;line-height:.94;font-size:clamp(2.6rem,7.4vw,6.8rem);max-width:16ch;letter-spacing:.005em}
+.footer-statement{font-weight:700;font-stretch:75%;text-transform:uppercase;line-height:.94;font-size:clamp(2.6rem,7.4vw,6.8rem);max-width:20ch;letter-spacing:.005em}
 .footer-grid{display:grid;grid-template-columns:7fr 5fr;gap:var(--gap);margin-top:7vh;align-items:start}
 .subscribe .mono{color:var(--gray);display:block;margin-bottom:1rem}
 .subscribe-row{display:flex;gap:.8rem;align-items:center}

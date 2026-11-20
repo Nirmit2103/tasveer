@@ -86,7 +86,14 @@ function setMenu(open){
   menu.setAttribute("aria-hidden", String(!open));
   if (lenis) open ? lenis.stop() : lenis.start();
   else document.body.style.overflow = open ? "hidden" : "";
-  if (open) setTimeout(()=>$(".menu-links a", menu)?.focus(), 80);
+  if (open){
+    const tryFocus=(n)=>{
+      const a=$(".menu-links a", menu);
+      if (a && getComputedStyle(menu).visibility==="visible") a.focus();
+      else if (n<12) setTimeout(()=>tryFocus(n+1), 30);
+    };
+    setTimeout(()=>tryFocus(0), 30);
+  }
 }
 burger.addEventListener("click", ()=>setMenu(!menu.classList.contains("open")));
 $("#menuClose").addEventListener("click", ()=>{ setMenu(false); burger.focus(); });
