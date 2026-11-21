@@ -28,6 +28,14 @@
   <span class="fill" id="progressFill"></span>
 </button>
 
+<nav class="pathfinder" id="pathfinder" aria-label="Scene navigation">
+  <a href="#top" data-goto="#top" data-scene="top"><span class="pf-tick"></span><span class="pf-num mono">01</span><span class="pf-label mono">BACKYARD</span></a>
+  <a href="#story" data-goto="#story" data-scene="story"><span class="pf-tick"></span><span class="pf-num mono">02</span><span class="pf-label mono">STORY</span></a>
+  <a href="#roll" data-goto="#roll" data-scene="roll"><span class="pf-tick"></span><span class="pf-num mono">03</span><span class="pf-label mono">THE ROLL</span></a>
+  <a href="#crew" data-goto="#crew" data-scene="crew"><span class="pf-tick"></span><span class="pf-num mono">04</span><span class="pf-label mono">CREW</span></a>
+  <a href="#open-call" data-goto="#open-call" data-scene="open-call"><span class="pf-tick"></span><span class="pf-num mono">05</span><span class="pf-label mono">OPEN CALL</span></a>
+</nav>
+
 <header class="nav" id="nav">
   <a class="nav-logo" href="#top" data-goto="#top" aria-label="Tasveer — back to top">
     <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -61,7 +69,18 @@
   </div>
 </div>
 
-<div class="intro-curtain" id="introCurtain" aria-hidden="true"></div>
+<div class="intro-curtain" id="introCurtain" aria-hidden="true">
+  <div class="leader">
+    <svg class="leader-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M4 10V4h6M22 4h6v6M28 22v6h-6M10 28H4v-6" stroke="currentColor" stroke-width="2.4"/>
+      <circle cx="16" cy="16" r="5.2" fill="currentColor"/>
+    </svg>
+    <div class="leader-word">TASVEER</div>
+    <div class="leader-count mono"><span id="leaderNum">000</span></div>
+    <div class="leader-bar"><span id="leaderFill"></span></div>
+    <div class="leader-cap mono">THREADING THE REEL</div>
+  </div>
+</div>
 <div class="roll-peek" id="rollPeek" aria-hidden="true"><img alt=""></div>
 <main id="main">
 

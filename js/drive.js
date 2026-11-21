@@ -398,6 +398,7 @@ if (matchMedia("(pointer: fine)").matches && !reduced && hasGsap){
 /* marquees speed up with scroll velocity, decay back (Drive signature) */
 if (hasGsap && !reduced){
   const tracks = $$(".marquee-track");
+  const bandTiles = $$("#photoBand .photo-tile");
   let vel = 0, lastY = window.scrollY;
   gsap.ticker.add(()=>{
     const y = window.scrollY, dv = y - lastY; lastY = y;
@@ -407,15 +408,31 @@ if (hasGsap && !reduced){
       const an = tr.getAnimations ? tr.getAnimations()[0] : null;
       if (an && an.playbackRate !== rate) an.playbackRate = rate;
     });
+    /* photo band leans into scroll velocity, settles upright (tactile) */
+    const skew = motionOn ? Math.max(-5, Math.min(5, vel * 0.1)) : 0;
+    const st = `skewX(${(-skew).toFixed(2)}deg)`;
+    bandTiles.forEach(t=>{ if (t.style.transform !== st) t.style.transform = st; });
   });
 }
-/* intro curtain: one cinematic lift, then gone */
+/* intro: film-leader preloader — frame counter, then aperture iris wipe */
 const curtain = $("#introCurtain");
 if (curtain){
-  if (reduced || !motionOn || !hasGsap) curtain.remove();
+  const kill = ()=>{ document.body.style.overflow = ""; if (curtain.parentNode) curtain.remove(); };
+  if (reduced || !motionOn || !hasGsap) kill();
   else {
-    gsap.to(curtain, {yPercent:-100, duration:.9, delay:.2, ease:"power4.inOut", onComplete:()=>curtain.remove()});
-    setTimeout(()=>{ if (curtain.parentNode) curtain.remove(); }, 2600);
+    document.body.style.overflow = "hidden";
+    const num = $("#leaderNum"), fill = $("#leaderFill"), leader = $(".leader", curtain);
+    const state = {n:0};
+    curtain.style.clipPath = "circle(141% at 50% 50%)";
+    const tl = gsap.timeline({onComplete:kill});
+    tl.to(state, {n:100, duration:1.05, ease:"power2.inOut", onUpdate:()=>{
+        const v = Math.round(state.n);
+        if (num) num.textContent = String(v).padStart(3,"0");
+        if (fill) fill.style.transform = `scaleX(${(state.n/100).toFixed(3)})`;
+      }})
+      .to(leader, {opacity:0, y:-12, duration:.3, ease:"power2.in"}, ">-0.05")
+      .to(curtain, {clipPath:"circle(0% at 50% 50%)", duration:.65, ease:"power3.inOut"}, ">-0.12");
+    setTimeout(kill, 3600);
   }
 }
 /* roll peek: first frame of each beat floats beside the cursor on hover */
@@ -448,6 +465,19 @@ if (matchMedia("(pointer: fine)").matches && !reduced){
     });
     p.addEventListener("mouseleave", ()=>{ p.style.transform = ""; });
   });
+}
+
+/* ---------- scene pathfinder: highlight the current section ---------- */
+const pf = $("#pathfinder");
+if (pf && "IntersectionObserver" in window){
+  const links = $$("a", pf);
+  const setActive = id=>links.forEach(a=>a.classList.toggle("active", a.dataset.scene===id));
+  const secs = ["top","story","roll","crew","open-call"].map(id=>document.getElementById(id)).filter(Boolean);
+  const io = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if (e.isIntersecting) setActive(e.target.id); });
+  }, {rootMargin:"-45% 0px -45% 0px", threshold:0});
+  secs.forEach(s=>io.observe(s));
+  setActive("top");
 }
 
 /* ---------- misc wiring ---------- */
