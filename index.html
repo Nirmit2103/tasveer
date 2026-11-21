@@ -63,18 +63,27 @@
 
 <main id="main">
 
-<!-- 01 · hero -->
+<!-- 01 · hero — full-bleed cinema -->
 <section class="hero" id="top" data-frame="01" data-section="THE BACKYARD">
+  <div class="hero-media" aria-hidden="true">
+    <video id="heroVideo" autoplay muted loop playsinline preload="metadata" poster="assets/drive/poster4.jpg">
+      <source src="assets/drive/clip4.mp4" type="video/mp4">
+    </video>
+    <div class="hero-scrim"></div>
+    <div class="hero-marquee marquee" id="heroMarquee"></div>
+  </div>
   <div class="hero-head">
+    <p class="hero-kicker mono">TASVEER · THE MEDIA SOCIETY OF IIIT DELHI</p>
     <h1 class="hero-title">
       <span class="mask"><span>EVERY STORY IS</span></span>
       <span class="mask"><span>IN OUR BACKYARD</span></span>
     </h1>
-    <p class="hero-kicker mono">TASVEER · THE MEDIA SOCIETY OF IIIT DELHI</p>
   </div>
+  <div class="hero-word-wrap" id="heroWordWrap" role="img" aria-label="TASVEER">
+    <span class="hero-word">TASVEER</span>
+  </div>
+  <div class="hero-stills" id="heroStills"></div>
   <div class="hero-scroll mono" aria-hidden="true">SCROLL <span class="arrow">↓</span></div>
-  <div class="hero-marquee marquee" id="heroMarquee" aria-hidden="true"></div>
-  <div class="hero-word-wrap" id="heroWordWrap" role="img" aria-label="TASVEER"></div>
 </section>
 
 <!-- photo band -->
@@ -94,12 +103,12 @@
   </div>
   <div class="collage">
     <figure class="c-small">
-      <img src="assets/drive/film-camera.webp" alt="A film camera, glass and dials" loading="lazy">
-      <figcaption class="mono">THE TOOLS · 35MM &amp; DIGITAL</figcaption>
+      <img src="assets/drive/photo014.webp" alt="A performer smiling with a guitar under teal stage light" loading="lazy">
+      <figcaption class="mono">THE NIGHT · TEAL LIGHT</figcaption>
     </figure>
     <figure class="c-big">
-      <img src="assets/drive/students.webp" alt="Students working together on campus" loading="lazy">
-      <figcaption class="mono">THE BACKYARD · OKHLA PHASE III</figcaption>
+      <img src="assets/drive/still1.jpg" alt="Aerial view of the fest grounds at night, a canopy of fairy lights over the crowd" loading="lazy">
+      <figcaption class="mono">THE BACKYARD · OKHLA, FROM ABOVE</figcaption>
     </figure>
   </div>
 </section>
@@ -113,6 +122,20 @@
   <div id="rollList"></div>
   <div class="roll-more">
     <a class="pill" href="mailto:tasveer@sc.iiitd.ac.in?subject=Send%20me%20the%20full%20archive">FULL ARCHIVE ON REQUEST <span class="arr">→</span></a>
+  </div>
+</section>
+
+<!-- interlude — full-bleed cinema -->
+<section class="interlude" id="interlude">
+  <div class="interlude-media" aria-hidden="true">
+    <video id="interludeVideo" muted loop playsinline preload="none" poster="assets/drive/poster1.jpg">
+      <source src="assets/drive/clip1.mp4" type="video/mp4">
+    </video>
+    <div class="interlude-scrim"></div>
+  </div>
+  <div class="interlude-copy">
+    <p class="mono interlude-kicker">ROLL 001 · OKHLA · 28.5°N</p>
+    <h2 class="interlude-line">EVERY EVENT ENDS.<br>THE FRAME DOESN'T.</h2>
   </div>
 </section>
 

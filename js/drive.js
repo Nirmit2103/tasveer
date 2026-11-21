@@ -32,19 +32,19 @@ const BEATS = [
 const A = "assets/drive/";
 const ROLL = [
   {name:"ANNUAL FEST '26", code:"FST", count:24, note:"Three days, four stages, one sleep-deprived crew.",
-   frames:[[A+"concert-purple.webp","headliner night, front rail"],[A+"stage-lights.webp","soundcheck, 6:40 PM"],[A+"crowd-hands.webp","the drop, every hand up"],[A+"confetti.webp","closing confetti"]]},
+   frames:[[A+"photo017.webp","headliner night, green light"],[A+"photo007.webp","split light, front rail"],[A+"crowd-hands.webp","the drop, every hand up"],[A+"photo026.webp","battle of bands, red light"]]},
   {name:"CULTURAL NIGHT", code:"CLT", count:18, note:"The lawns after dark — fairy lights, open mic, and the long exposure nobody planned.",
-   frames:[[A+"sparklers.webp","sparkler run, hostel lawn"],[A+"concert-sil.webp","silhouettes, stage left"],[A+"friends-night.webp","the after-party that wasn't"],[A+"event-crowd.webp","front row, mid-set"]]},
+   frames:[[A+"photo019.webp","the verse nobody forgot"],[A+"photo028.webp","duet, stage left"],[A+"photo014.webp","the smile, teal light"],[A+"photo020.webp","crowning moment"]]},
   {name:"CONVOCATION", code:"CNV", count:32, note:"Caps in the air, parents in the frame. We shoot the day everyone forgets to document.",
    frames:[[A+"campus-bldg.webp","the quad, morning of"],[A+"presentation.webp","the address"],[A+"students.webp","waiting for names"],[A+"conference.webp","the full house"]]},
   {name:"HACKATHON", code:"HCK", count:12, note:"36 hours of caffeine and commit messages. Shot on whatever was charged.",
    frames:[[A+"laptops.webp","hour 22, still building"],[A+"students.webp","the whiteboard argument"],[A+"library2.webp","quiet floor, loud minds"],[A+"library.webp","reference section, 3 AM"]]},
   {name:"SPORTS MEET", code:"SPT", count:26, note:"Finish lines, frozen. The sports complex is our fastest shutter speed.",
-   frames:[[A+"basketball.webp","the final, overtime"],[A+"friends.webp","the winning huddle"],[A+"crowd-hands.webp","the stands, last over"],[A+"event-crowd.webp","medal ceremony"]]},
+   frames:[[A+"photo005.webp","the backflip, peak action"],[A+"friends.webp","the winning huddle"],[A+"crowd-hands.webp","the stands, last over"],[A+"event-crowd.webp","medal ceremony"]]},
   {name:"CAMPUS QUIET", code:"QUT", count:15, note:"Between events, the campus is still a story. These are the frames nobody asks for.",
    frames:[[A+"library.webp","the reading room"],[A+"camera-girl.webp","a shooter, shooting shooters"],[A+"vintage-cam.webp","the society's first camera"],[A+"film-camera.webp","glass and dials"]]},
 ];
-const HERO_IMGS = [A+"hero-aerial.webp", A+"hero-aerial2.webp", A+"hero-aerial3.webp"];
+const HERO_POSTER = A+"poster4.jpg";
 
 /* ---------- smooth scroll: desktop wheel only ---------- */
 let lenis = null;
@@ -130,34 +130,59 @@ buildMarquee($("#heroMarquee"), heroItems, {secPerItem:6});
 const beatItems = BEATS.map(b=>`<span class="item" data-item><span class="name">${esc(b.name)}</span><span class="code">${esc(b.code)}</span></span>`).join("");
 buildMarquee($("#beatMarquee"), beatItems, {invert:true, secPerItem:9});
 
-/* photo band: real society frames + documentary placeholders, varied heights */
+/* photo band: real society frames + the crew's best fest frames */
 const bandImgs = [
   ...GALLERY.map(g=>[g.src, g.cap.replace(/^ROLL \d+ · FR \d+ — /,"")]),
-  [A+"crowd-hands.webp","the drop"],[A+"stage-lights.webp","soundcheck"],[A+"sparklers.webp","lawn, after dark"],
-  [A+"conference.webp","the full house"],[A+"basketball.webp","overtime"],[A+"camera-girl.webp","a shooter shooting"],
-  [A+"friends-night.webp","the after-party"],[A+"confetti.webp","closing night"],
+  [A+"photo017.webp","green light"],[A+"photo026.webp","red light"],[A+"photo019.webp","the verse"],
+  [A+"photo028.webp","duet"],[A+"photo020.webp","crowning"],[A+"photo007.webp","split light"],
+  [A+"photo012.webp","amber"],[A+"photo014.webp","teal smile"],[A+"photo015.webp","bokeh"],
+  [A+"photo005.webp","peak action"],
 ];
 const tileCls = ["t-a","t-b","t-c"];
 const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
 buildMarquee($("#photoBand"), bandHTML, {invert:true, secPerItem:4, pauseHover:true});
 
-/* ---------- hero wordmark: photo crossfade layers ---------- */
-const wordWrap = $("#heroWordWrap");
-HERO_IMGS.forEach((src,i)=>{
-  const s = document.createElement("span");
-  s.className = "hero-word" + (i>0 ? " layer" : "");
-  s.textContent = "TASVEER";
-  s.style.backgroundImage = `url("${src}")`;
-  if (i>0) s.setAttribute("aria-hidden","true");
-  wordWrap.appendChild(s);
-});
-let wordCycle = null;
+/* ---------- hero: cinema video + parallax wordmark + stills ---------- */
+const heroVideo = $("#heroVideo");
+const heroWordWrap = $("#heroWordWrap");
+const STILLS = [
+  ["assets/drive/still1.jpg","the lawns, fest night — from above"],
+  ["assets/drive/still2.jpg","the verse, amber light"],
+  ["assets/drive/still3.jpg","a canopy of lights, okhla"],
+];
+$("#heroStills").innerHTML = STILLS.map(s=>`<figure data-cursor="VIEW"><div class="imgwrap"><img src="${esc(s[0])}" alt="${esc(s[1])}" loading="lazy"></div><figcaption class="mono">${esc(s[1])}</figcaption></figure>`).join("");
+function heroVideoState(){
+  if (!heroVideo) return;
+  if (reduced || !motionOn) heroVideo.pause();
+  else heroVideo.play().catch(()=>{});
+  syncInterlude();
+}
+/* interlude video: play only while on screen (perf), respect motion prefs */
+const interludeVideo = $("#interludeVideo");
+let interludeVisible = false;
+function syncInterlude(){
+  if (!interludeVideo) return;
+  if (reduced || !motionOn || !interludeVisible) interludeVideo.pause();
+  else interludeVideo.play().catch(()=>{});
+}
+if (interludeVideo && "IntersectionObserver" in window){
+  new IntersectionObserver(es=>{
+    interludeVisible = es[0].isIntersecting;
+    syncInterlude();
+  }, {threshold:.15}).observe($(".interlude"));
+}
+if (reduced && heroVideo){ heroVideo.removeAttribute("autoplay"); heroVideo.pause(); }
 if (hasGsap && !reduced){
-  const layers = $$(".hero-word.layer", wordWrap);
-  wordCycle = gsap.timeline({repeat:-1});
-  layers.forEach((l,i)=>{
-    wordCycle.to(l, {opacity:1, duration:1.6, ease:"power2.inOut"}, i*5)
-             .to(l, {opacity:0, duration:1.6, ease:"power2.inOut"}, i*5 + 3.4);
+  ScrollTrigger.create({
+    trigger:".hero", start:"top top", end:"bottom top", scrub:true,
+    onUpdate:self=>{
+      const y = self.scroll()*0.12, sc = 1 + self.progress*0.06;
+      heroWordWrap.style.transform = `translateY(${y}px) scale(${sc})`;
+    }
+  });
+  $$(".hero-stills figure").forEach((f,i)=>{
+    gsap.fromTo(f, {y:70+i*36}, {y:-36-i*18, ease:"none",
+      scrollTrigger:{trigger:".hero-stills", start:"top bottom", end:"bottom top", scrub:true}});
   });
 }
 
@@ -297,7 +322,7 @@ function applyMotion(){
     b.setAttribute("aria-pressed", String(motionOn));
     b.textContent = motionOn ? "MOTION ◉" : "MOTION ○";
   });
-  if (wordCycle) motionOn ? wordCycle.play() : wordCycle.pause();
+  heroVideoState();
 }
 $$("[data-motion-toggle]").forEach(b=>b.addEventListener("click", ()=>{
   motionOn = !motionOn;
