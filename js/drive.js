@@ -33,14 +33,14 @@ const A = "assets/drive/";
 const ROLL = [
   {name:"ANNUAL FEST '26", code:"FST", count:24, note:"Three days, four stages, one sleep-deprived crew.",
    frames:[[A+"photo017.webp","headliner night, green light"],[A+"photo007.webp","split light, front rail"],[A+"photo045.webp","the full house, purple wash"],[A+"photo026.webp","battle of bands, red light"]]},
-  {name:"CULTURAL NIGHT", code:"CLT", count:18, note:"The lawns after dark — fairy lights, open mic, and the long exposure nobody planned.",
-   frames:[[A+"photo019.webp","the verse nobody forgot"],[A+"photo028.webp","duet, stage left"],[A+"photo014.webp","the smile, teal light"],[A+"photo020.webp","crowning moment"]]},
+  {name:"MAADHYAM", code:"MDY", count:18, note:"The cultural fest — fire, flips, and the verse that silenced the lawn.",
+   frames:[[A+"photo077.webp","the diya, held breath"],[A+"photo075.webp","mid-flip, red backdrop"],[A+"photo079.webp","the duet, purple hour"],[A+"photo019.webp","the verse nobody forgot"]]},
   {name:"CONVOCATION", code:"CNV", count:32, note:"Caps in the air, parents in the frame. We shoot the day everyone forgets to document.",
    frames:[[A+"campus-bldg.webp","the quad, morning of"],[A+"presentation.webp","the address"],[A+"students.webp","waiting for names"],[A+"conference.webp","the full house"]]},
-  {name:"HACKATHON", code:"HCK", count:12, note:"36 hours of caffeine and commit messages. Shot on whatever was charged.",
-   frames:[[A+"laptops.webp","hour 22, still building"],[A+"students.webp","the whiteboard argument"],[A+"library2.webp","quiet floor, loud minds"],[A+"library.webp","reference section, 3 AM"]]},
+  {name:"ESYA TECH FEST", code:"ESY", count:12, note:"The tech fest — talks, builds, and the demo that almost didn't boot.",
+   frames:[[A+"photo053.webp","the talk, day one"],[A+"laptops.webp","hour 22, still building"],[A+"students.webp","the whiteboard argument"],[A+"library2.webp","quiet floor, loud minds"]]},
   {name:"SPORTS MEET", code:"SPT", count:26, note:"Finish lines, frozen. The sports complex is our fastest shutter speed.",
-   frames:[[A+"photo005.webp","the backflip, peak action"],[A+"friends.webp","the winning huddle"],[A+"crowd-hands.webp","the stands, last over"],[A+"event-crowd.webp","medal ceremony"]]},
+   frames:[[A+"photo005.webp","the backflip, peak action"],[A+"photo062.webp","the pool final, dead focus"],[A+"crowd-hands.webp","the stands, last over"],[A+"event-crowd.webp","medal ceremony"]]},
   {name:"CAMPUS QUIET", code:"QUT", count:15, note:"Between events, the campus is still a story. These are the frames nobody asks for.",
    frames:[[A+"library.webp","the reading room"],[A+"camera-girl.webp","a shooter, shooting shooters"],[A+"vintage-cam.webp","the society's first camera"],[A+"film-camera.webp","glass and dials"]]},
 ];
@@ -138,6 +138,10 @@ const bandImgs = [
   [A+"photo012.webp","amber"],[A+"photo014.webp","teal smile"],[A+"photo015.webp","bokeh"],
   [A+"photo005.webp","peak action"],[A+"photo034.webp","suited up"],[A+"photo038.webp","the crew, formal"],
   [A+"photo041.webp","the couple"],[A+"photo044.webp","pink saree"],[A+"photo045.webp","purple wash"],
+  [A+"photo051.webp","string lights"],[A+"photo052.webp","kurtas"],[A+"photo057.webp","hands up"],
+  [A+"photo053.webp","the talk, esya"],[A+"photo062.webp","dead focus"],
+  [A+"photo074.webp","monochrome"],[A+"photo075.webp","mid-flip"],[A+"photo077.webp","the diya"],
+  [A+"photo078.webp","the march"],[A+"photo079.webp","purple hour"],
 ];
 const tileCls = ["t-a","t-b","t-c"];
 const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
@@ -152,34 +156,63 @@ const STILLS = [
   ["assets/drive/still3.jpg","a canopy of lights, okhla"],
 ];
 $("#heroStills").innerHTML = STILLS.map(s=>`<figure data-cursor="VIEW"><div class="imgwrap"><img src="${esc(s[0])}" alt="${esc(s[1])}" loading="lazy"></div><figcaption class="mono">${esc(s[1])}</figcaption></figure>`).join("");
-function heroVideoState(){
+/* hero video: scroll-driven, not autoplay. Scroll advances the footage
+   AND zooms out (1.28 → 1.0), scrubbed in sync with the wordmark. */
+let heroP = 0, heroSeekT = -1;
+function scrubHeroVideo(p){
   if (!heroVideo) return;
-  if (reduced || !motionOn) heroVideo.pause();
-  else heroVideo.play().catch(()=>{});
-  syncInterlude();
+  if (reduced || !motionOn){ heroVideo.style.transform = "scale(1)"; return; }
+  const d = heroVideo.duration;
+  if (d && isFinite(d)){
+    const t = p * Math.max(0, d - 0.08);
+    if (Math.abs(heroSeekT - t) > 0.04){ heroSeekT = t; heroVideo.currentTime = t; }
+  }
+  heroVideo.style.transform = `scale(${(1.28 - 0.28 * p).toFixed(4)})`;
 }
-/* interlude video: play only while on screen (perf), respect motion prefs */
+function heroVideoState(){
+  if (heroVideo) heroVideo.pause();
+  scrubHeroVideo(heroP);
+  scrubInterludeVideo(interludeP);
+}
+if (heroVideo){
+  heroVideo.removeAttribute("autoplay");
+  heroVideo.pause();
+  const initHero = ()=>scrubHeroVideo(heroP);
+  if (heroVideo.readyState >= 1) initHero();
+  else heroVideo.addEventListener("loadedmetadata", initHero, {once:true});
+}
+/* interlude video: same scroll-scrub + zoom-out treatment */
 const interludeVideo = $("#interludeVideo");
-let interludeVisible = false;
-function syncInterlude(){
+let interludeP = 0, interSeekT = -1;
+function scrubInterludeVideo(p){
   if (!interludeVideo) return;
-  if (reduced || !motionOn || !interludeVisible) interludeVideo.pause();
-  else interludeVideo.play().catch(()=>{});
+  if (reduced || !motionOn){ interludeVideo.style.transform = "scale(1)"; return; }
+  const d = interludeVideo.duration;
+  if (d && isFinite(d)){
+    const t = p * Math.max(0, d - 0.08);
+    if (Math.abs(interSeekT - t) > 0.04){ interSeekT = t; interludeVideo.currentTime = t; }
+  }
+  interludeVideo.style.transform = `scale(${(1.22 - 0.22 * p).toFixed(4)})`;
 }
-if (interludeVideo && "IntersectionObserver" in window){
-  new IntersectionObserver(es=>{
-    interludeVisible = es[0].isIntersecting;
-    syncInterlude();
-  }, {threshold:.15}).observe($(".interlude"));
+if (interludeVideo){
+  interludeVideo.pause();
+  const initInt = ()=>scrubInterludeVideo(interludeP);
+  if (interludeVideo.readyState >= 1) initInt();
+  else interludeVideo.addEventListener("loadedmetadata", initInt, {once:true});
 }
-if (reduced && heroVideo){ heroVideo.removeAttribute("autoplay"); heroVideo.pause(); }
 if (hasGsap && !reduced){
   ScrollTrigger.create({
     trigger:".hero", start:"top top", end:"bottom top", scrub:true,
     onUpdate:self=>{
+      heroP = self.progress;
       const y = self.scroll()*0.12, sc = 1 + self.progress*0.06;
       heroWordWrap.style.transform = `translateY(${y}px) scale(${sc})`;
+      scrubHeroVideo(self.progress);
     }
+  });
+  ScrollTrigger.create({
+    trigger:".interlude", start:"top bottom", end:"bottom top", scrub:true,
+    onUpdate:self=>{ interludeP = self.progress; scrubInterludeVideo(self.progress); }
   });
   $$(".hero-stills figure").forEach((f,i)=>{
     gsap.fromTo(f, {y:70+i*36}, {y:-36-i*18, ease:"none",

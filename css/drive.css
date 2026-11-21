@@ -93,7 +93,7 @@ body.daylight .burger span{background:var(--cream)}
 /* hero — full-bleed cinema */
 .hero{position:relative;height:178vh;min-height:980px;background:var(--black)}
 .hero-media{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;z-index:0}
-.hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:center;will-change:transform;backface-visibility:hidden}
 .hero-scrim{position:absolute;inset:0;pointer-events:none;background:
   linear-gradient(to bottom,
     color-mix(in srgb,var(--black) 84%,transparent) 0%,
@@ -128,7 +128,7 @@ body.calm .hero-scroll .arrow{animation:none}
 /* interlude — full-bleed cinema break */
 .interlude{position:relative;height:135vh;background:var(--black)}
 .interlude-media{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-.interlude-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.interlude-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:center;will-change:transform;backface-visibility:hidden}
 .interlude-scrim{position:absolute;inset:0;pointer-events:none;background:
   linear-gradient(to bottom,var(--black) 0%,color-mix(in srgb,var(--black) 22%,transparent) 26%,
   color-mix(in srgb,var(--black) 30%,transparent) 62%,var(--black) 100%)}
