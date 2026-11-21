@@ -114,17 +114,17 @@ body.calm .intro-curtain{display:none}
 .roll-peek{position:fixed;top:0;left:0;width:min(24vw,300px);aspect-ratio:4/3;z-index:90;pointer-events:none;
   opacity:0;overflow:hidden;border:1px solid var(--line-strong);background:var(--coal);
   transition:opacity .25s;will-change:transform}
-.roll-peek.on{opacity:1}
+.roll-peek:not(.ghost).on{opacity:1}
 .roll-peek img{width:100%;height:100%;object-fit:cover;display:block}
 @media (pointer:coarse){.roll-peek{display:none}}
 .pill{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 .photo-tile{will-change:transform}
 /* scene pathfinder — cinematic orientation rail (desktop) */
-.pathfinder{position:fixed;left:1.15rem;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:.85rem}
-.pathfinder a{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--gray);transition:color .3s}
+.pathfinder{position:fixed;left:1.15rem;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:.85rem;pointer-events:none}
+.pathfinder a{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--gray);transition:color .3s;pointer-events:auto}
 .pf-tick{width:14px;height:1px;background:currentColor;opacity:.5;transition:width .3s,opacity .3s,background .3s}
 .pf-num{font-size:.58rem;letter-spacing:.1em;text-shadow:0 1px 10px color-mix(in srgb,var(--black) 85%,transparent)}
-.pf-label{font-size:.56rem;letter-spacing:.2em;opacity:0;transform:translateX(-5px);transition:opacity .3s,transform .3s;white-space:nowrap;text-shadow:0 1px 10px color-mix(in srgb,var(--black) 85%,transparent)}
+.pf-label{font-size:.56rem;letter-spacing:.2em;opacity:0;transform:translateX(-5px);transition:opacity .3s,transform .3s;white-space:nowrap;text-shadow:0 1px 10px color-mix(in srgb,var(--black) 85%,transparent);pointer-events:none}
 .pathfinder a.active{color:var(--ink)}
 .pathfinder a.active .pf-tick{width:26px;opacity:1;background:var(--blue)}
 .pathfinder a.active .pf-num{color:var(--blue)}
@@ -243,16 +243,16 @@ body.calm .gate-rec{animation:none}
 .story-right{border-bottom:1px solid var(--line-strong);padding-bottom:2rem}
 .story-body{font-size:clamp(1.25rem,1.9vw,1.8rem);line-height:1.45;font-weight:400;max-width:34ch}
 .story-body + .story-body{margin-top:1.4rem;color:var(--gray)}
-.pill{display:inline-flex;align-items:center;gap:.8rem;border:1px solid var(--line-strong);border-radius:99px;
+.pill{position:relative;z-index:81;display:inline-flex;align-items:center;gap:.8rem;border:1px solid var(--line-strong);border-radius:99px;
   padding:1rem 1.9rem;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  transition:background .3s,color .3s,border-color .3s;align-self:flex-start}
-.pill:hover{background:var(--ink);color:var(--black);border-color:var(--ink)}
+  transition:border-color .3s;align-self:flex-start}
+.pill:hover{border-color:var(--ink)}
 .pill .arr{transition:transform .3s}
 .pill:hover .arr{transform:translateX(4px)}
 .collage{position:relative;margin-top:9vh;min-height:44vw}
-.collage figure{position:absolute;overflow:hidden}
-.collage img{width:100%;height:100%;object-fit:cover;filter:var(--warm-mono);transition:filter .8s,transform 1.2s var(--ease-out-expo)}
-.collage figure:hover img{filter:none;transform:scale(1.03)}
+.collage figure{position:absolute}
+.collage img{position:absolute;top:-10%;left:0;width:100%;height:120%;object-fit:cover;filter:var(--warm-mono);transition:filter .8s}
+.collage figure:hover img{filter:none}
 .collage .c-small{left:0;top:0;width:31%;height:26vw}
 .collage .c-big{right:0;top:9vw;width:62%;height:35vw}
 .collage figcaption{position:absolute;left:0;bottom:-1.7rem;color:var(--gray)}
@@ -524,3 +524,44 @@ body.calm .lb-imgwrap{transition:none}
 body.calm .lb-imgwrap.switching img{transition:none}
 /* WCAG 2.5.8 minimum target */
 .crew-filters button{min-width:24px}
+
+/* ---------- batch 9: Awwwards-grade finish (inspired-by, original code) ---------- */
+/* marching film perforations — menu links */
+.menu-links a{position:relative}
+.menu-links a::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;opacity:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,var(--blue-bright) 0 8px,transparent 8px 14px);
+  background-size:14px 2px;transition:opacity .3s}
+.menu-links a:hover::after,.menu-links a:focus-visible::after{opacity:1;animation:perfMarch .5s linear infinite}
+@keyframes perfMarch{to{background-position-x:14px}}
+body.calm .menu-links a::after{animation:none}
+/* marching perforations — footer + cream legal links */
+.footer-links a:hover,.footer-links button:hover,.cream-legal a:hover{
+  text-decoration:none;background-image:repeating-linear-gradient(90deg,currentColor 0 7px,transparent 7px 12px);
+  background-size:12px 1px;background-position:0 100%;background-repeat:repeat-x;animation:perfMarch2 .5s linear infinite}
+@keyframes perfMarch2{to{background-position-x:12px}}
+body.calm .footer-links a:hover,body.calm .footer-links button:hover,body.calm .cream-legal a:hover{animation:none}
+@media (prefers-reduced-motion:reduce){.menu-links a::after,.footer-links a:hover,.footer-links button:hover,.cream-legal a:hover{animation:none}}
+
+/* text-roll fill pills — label rolls up revealing its twin as the fill rises */
+.pill::before{content:"";position:absolute;inset:0;border-radius:99px;background:var(--ink);z-index:0;
+  clip-path:inset(100% 0 0 0 round 99px);transition:clip-path .5s var(--ease-out-expo)}
+.pill:hover::before{clip-path:inset(0 0 0 0 round 99px)}
+.pill-clip{position:relative;z-index:1;display:inline-block;overflow:hidden;line-height:1;vertical-align:middle}
+.pill-roll{display:inline-flex;align-items:center;gap:.8rem;line-height:1;
+  transition:transform .5s var(--ease-out-expo);text-shadow:0 1em 0 var(--black)}
+.pill:hover .pill-roll{transform:translateY(-1em)}
+body.calm .pill::before,body.calm .pill-roll{transition:none}
+
+/* cursor label edge flip — never clips at viewport edges */
+.cursor-label.flip-x{left:auto;right:14px}
+.cursor-label.flip-y{top:-30px}
+
+/* ghost-trail roll peek — persistence-of-vision echoes */
+.roll-peek.ghost{z-index:89;border-color:var(--line)}
+.roll-peek.ghost img{filter:var(--warm-mono)}
+.roll-peek.ghost.g1.on{opacity:.32}
+.roll-peek.ghost.g2.on{opacity:.16}
+
+/* collage inner gate — parallax window, hover zoom, captions freed */
+.collage .inner{position:absolute;inset:0;overflow:hidden;transition:transform 1.2s var(--ease-out-expo)}
+.collage figure:hover .inner{transform:scale(1.03)}

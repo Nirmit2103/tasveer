@@ -175,14 +175,36 @@ let heroP = 0, wordFit = 1;
 function measureWord(){
   if (heroWord) wordFit = Math.min(1, (innerWidth * 0.9) / heroWord.offsetWidth);
 }
+/* projector shutter: randomized vertical bars wipe Shot B in (signature) */
+const SHUTTER_BARS = Array.from({length:9}, ()=>({off: Math.random()*0.45}));
+const shutterOK = typeof CSS!=="undefined" && CSS.supports && CSS.supports("mask-image","linear-gradient(90deg,black,transparent)");
+function shutterMask(local){
+  const n=SHUTTER_BARS.length, st=[];
+  for (let i=0;i<n;i++){
+    const r=Math.min(1,Math.max(0,(local-SHUTTER_BARS[i].off)/0.55));
+    const x0=i/n*100, x1=(i+1)/n*100, e=x0+(x1-x0)*r;
+    st.push(`black ${x0.toFixed(2)}% ${e.toFixed(2)}%`, `transparent ${e.toFixed(2)}% ${x1.toFixed(2)}%`);
+  }
+  return `linear-gradient(90deg,${st.join(",")})`;
+}
 function heroChoreo(p){
   const s = (1.18 - 0.18 * p).toFixed(4);
   const t = `translateY(${(-3 * p).toFixed(2)}vh) scale(${s})`;
   if (heroVideo) heroVideo.style.transform = t;
   if (heroVideoB){
     heroVideoB.style.transform = t;
-    const f = Math.min(1, Math.max(0, (p - 0.38) / 0.30));
-    heroVideoB.style.opacity = (f * f * (3 - 2 * f)).toFixed(3);
+    if (touchDevice){ heroVideoB.style.opacity = 0; }
+    else {
+      const local = Math.min(1, Math.max(0, (p - 0.38) / 0.30));
+      if (shutterOK){ /* callers gate motionOn && !reduced; calm/reduced hold static Shot A via heroVideoState */
+        heroVideoB.style.opacity = local > 0 ? "1" : "0";
+        const m = shutterMask(local);
+        heroVideoB.style.maskImage = m; heroVideoB.style.webkitMaskImage = m;
+      } else {
+        heroVideoB.style.maskImage = ""; heroVideoB.style.webkitMaskImage = "";
+        heroVideoB.style.opacity = (local*local*(3-2*local)).toFixed(3);
+      }
+    }
   }
   if (heroWordWrap){
     const ws = wordFit + (1.06 - wordFit) * p;
@@ -196,14 +218,14 @@ function heroVideoState(){
   if (heroVideoB) (play && !touchDevice) ? heroVideoB.play().catch(()=>{}) : heroVideoB.pause();
   if (!play){
     if (heroVideo) heroVideo.style.transform = "scale(1)";
-    if (heroVideoB){ heroVideoB.style.transform = "scale(1)"; heroVideoB.style.opacity = 0; }
+    if (heroVideoB){ heroVideoB.style.transform = "scale(1)"; heroVideoB.style.opacity = 0; heroVideoB.style.maskImage = ""; heroVideoB.style.webkitMaskImage = ""; }
     if (heroWordWrap) heroWordWrap.style.transform = `translateY(${(-0.09 * innerHeight).toFixed(1)}px) scale(${wordFit.toFixed(4)})`;
   } else heroChoreo(heroP);
   syncInterlude();
 }
 measureWord();
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ measureWord(); heroChoreo(heroP); });
-addEventListener("resize", ()=>{ measureWord(); heroChoreo(heroP); }, {passive:true});
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ measureWord(); if (motionOn && !reduced) heroChoreo(heroP); else heroVideoState(); });
+addEventListener("resize", ()=>{ measureWord(); if (motionOn && !reduced) heroChoreo(heroP); else heroVideoState(); }, {passive:true});
 /* interlude: living footage, plays on screen, scroll zoom-out */
 const interludeVideo = $("#interludeVideo");
 let interludeVisible = false, interludeP = 0;
@@ -243,7 +265,7 @@ function revealOnEnter(trigger, targets, fromVars, toVars){
   if (!els.length) return;
   ScrollTrigger.create({
     trigger, start:"top 82%", once:true,
-    onEnter: ()=>gsap.fromTo(els, fromVars, {...toVars, overwrite:"auto"}),
+    onEnter: ()=>gsap.fromTo(els, fromVars, {...toVars, overwrite:"auto", onComplete:()=>gsap.set(els,{clearProps:"transform"})}),
     onRefresh: self=>{ if (self.progress > 0) gsap.set(els, {clearProps:"transform,opacity"}); }
   });
 }
@@ -389,8 +411,13 @@ applyMotion();
 /* ---------- cursor follower (fine pointer only) ---------- */
 if (matchMedia("(pointer: fine)").matches && !reduced && hasGsap){
   const cur = $("#cursor"), label = $(".cursor-label", cur);
+  $("#progressPill")?.setAttribute("data-easteregg","SECRET");
   let mx=innerWidth/2, my=innerHeight/2, cx=mx, cy=my;
-  addEventListener("mousemove", e=>{ mx=e.clientX; my=e.clientY; cur.classList.add("on"); });
+  addEventListener("mousemove", e=>{
+    mx=e.clientX; my=e.clientY; cur.classList.add("on");
+    label.classList.toggle("flip-x", mx > innerWidth-180);
+    label.classList.toggle("flip-y", my > innerHeight-70);
+  });
   document.addEventListener("mouseleave", ()=>cur.classList.remove("on"));
   gsap.ticker.add(()=>{
     cx += (mx-cx)*.22; cy += (my-cy)*.22;
@@ -399,7 +426,7 @@ if (matchMedia("(pointer: fine)").matches && !reduced && hasGsap){
   });
   document.addEventListener("mouseover", e=>{
     const t = e.target.closest("[data-cursor],a,button");
-    if (t){ label.textContent = t.dataset.cursor || (t.classList.contains("member") ? "FLIP" : "GO"); label.style.display="block"; }
+    if (t){ label.textContent = (t.dataset.easteregg && e.clientX > innerWidth/2) ? t.dataset.easteregg : (t.dataset.cursor || (t.classList.contains("member") ? "FLIP" : "GO")); label.style.display="block"; }
     else label.style.display="none";
     cur.classList.toggle("view", !!t && t.dataset.cursor==="VIEW");
   });
@@ -429,21 +456,30 @@ if (hasGsap && !reduced){
 const curtain = $("#introCurtain");
 if (curtain){
   let killed = false;
-  const kill = ()=>{ if (killed) return; killed = true; document.body.style.overflow = ""; if (curtain.parentNode) curtain.remove(); if (!reduced && motionOn) decodeText($(".hero-kicker")); };
+  const kill = ()=>{ if (killed) return; killed = true; try{ sessionStorage.setItem("tasveer_leader_shown","1"); }catch(_){} document.body.style.overflow = ""; if (curtain.parentNode) curtain.remove(); if (!reduced && motionOn) decodeText($(".hero-kicker")); };
   if (reduced || !motionOn || !hasGsap) kill();
   else {
     document.body.style.overflow = "hidden";
     const num = $("#leaderNum"), fill = $("#leaderFill"), leader = $(".leader", curtain);
-    const state = {n:0};
+    let seen = false; try{ seen = sessionStorage.getItem("tasveer_leader_shown")==="1"; }catch(_){}
     curtain.style.clipPath = "circle(141% at 50% 50%)";
-    const tl = gsap.timeline({onComplete:kill});
-    tl.to(state, {n:100, duration:1.05, ease:"power2.inOut", onUpdate:()=>{
-        const v = Math.round(state.n);
-        if (num) num.textContent = String(v).padStart(3,"0");
-        if (fill) fill.style.transform = `scaleX(${(state.n/100).toFixed(3)})`;
-      }})
-      .to(leader, {opacity:0, y:-12, duration:.3, ease:"power2.in"}, ">-0.05")
-      .to(curtain, {clipPath:"circle(0% at 50% 50%)", duration:.65, ease:"power3.inOut"}, ">-0.12");
+    if (seen){
+      leader.style.display = "none";
+      gsap.to(curtain, {clipPath:"circle(0% at 50% 50%)", duration:.4, ease:"power3.inOut", onComplete:kill});
+    } else {
+      const state = {n:0};
+      const tl = gsap.timeline({onComplete:kill});
+      tl.to(state, {n:100, duration:1.05, ease:"power2.inOut", onUpdate:()=>{
+          const v = Math.round(state.n);
+          if (num) num.textContent = String(v).padStart(3,"0");
+          if (fill) fill.style.transform = `scaleX(${(state.n/100).toFixed(3)})`;
+        }})
+        .to(leader, {opacity:0, y:-12, duration:.3, ease:"power2.in"}, ">-0.05")
+        .to(curtain, {clipPath:"circle(0% at 50% 50%)", duration:.65, ease:"power3.inOut"}, ">-0.12");
+    }
+    const skip = ()=>kill();
+    document.addEventListener("pointerdown", skip, {once:true});
+    document.addEventListener("keydown", skip, {once:true});
     setTimeout(kill, 3600);
   }
 }
@@ -451,11 +487,16 @@ if (curtain){
 const peek = $("#rollPeek");
 if (peek && matchMedia("(pointer: fine)").matches && !reduced){
   const pimg = $("img", peek);
+  const ghosts = [["g1",.10],["g2",.07]].map(([cls,f])=>{
+    const el = document.createElement("div"); el.className = "roll-peek ghost "+cls; el.setAttribute("aria-hidden","true");
+    el.innerHTML = '<img alt="">'; document.body.appendChild(el);
+    return {el, img:el.querySelector("img"), x:innerWidth/2, y:innerHeight/2, f};
+  });
   ROLL.forEach(b=>{ const im = new Image(); im.src = b.frames[0][0]; });
   let px = innerWidth/2, py = innerHeight/2, tx = px, ty = py;
   $$(".beat-row").forEach((row,i)=>{
-    row.addEventListener("mouseenter", ()=>{ pimg.src = ROLL[i].frames[0][0]; peek.classList.add("on"); });
-    row.addEventListener("mouseleave", ()=>peek.classList.remove("on"));
+    row.addEventListener("mouseenter", ()=>{ const src=ROLL[i].frames[0][0]; pimg.src=src; peek.classList.add("on"); ghosts.forEach(g=>{ g.img.src=src; g.el.classList.add("on"); }); });
+    row.addEventListener("mouseleave", ()=>{ peek.classList.remove("on"); ghosts.forEach(g=>g.el.classList.remove("on")); });
   });
   addEventListener("mousemove", e=>{
     tx = Math.min(e.clientX + 150, innerWidth - 170);
@@ -464,6 +505,10 @@ if (peek && matchMedia("(pointer: fine)").matches && !reduced){
   if (hasGsap) gsap.ticker.add(()=>{
     px += (tx - px) * .14; py += (ty - py) * .14;
     peek.style.transform = `translate3d(${px.toFixed(1)}px,${py.toFixed(1)}px,0) translate(-50%,-50%)`;
+    ghosts.forEach(g=>{
+      g.x += (tx - g.x) * g.f; g.y += (ty - g.y) * g.f;
+      g.el.style.transform = `translate3d(${g.x.toFixed(1)}px,${g.y.toFixed(1)}px,0) translate(-50%,-50%)`;
+    });
   });
 }
 /* magnetic pills: subtle pull toward the cursor */
@@ -473,11 +518,16 @@ if (matchMedia("(pointer: fine)").matches && !reduced){
       const r = p.getBoundingClientRect();
       const dx = (e.clientX - (r.left + r.width/2)) * 0.18;
       const dy = (e.clientY - (r.top + r.height/2)) * 0.3;
-      p.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;
+      p.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
     });
-    p.addEventListener("mouseleave", ()=>{ p.style.transform = ""; });
+    p.addEventListener("mouseleave", ()=>{ p.style.translate = ""; });
   });
 }
+/* text-roll fill: wrap pill labels so the twin rolls up under a rising fill */
+$$(".pill").forEach(p=>{
+  if (p.querySelector(".pill-clip")) return;
+  p.innerHTML = `<span class="pill-clip"><span class="pill-roll">${p.innerHTML}</span></span>`;
+});
 
 /* ---------- the contact sheet: pull-the-film horizontal strip ----------
    Film spacers let every frame sit centered in the gate; mouse drag carries
@@ -661,8 +711,9 @@ function lbActivate(fig){
 }
 /* mark every viewable frame as a button */
 $$(".hero-stills figure, .collage figure, .beat-frames figure, .sheet-frame, #photoBand .photo-tile").forEach(f=>{
-  if (f.getAttribute("aria-hidden")==="true") return;
-  f.setAttribute("data-lb",""); f.setAttribute("tabindex","0"); f.setAttribute("role","button");
+  f.setAttribute("data-lb","");
+  if (f.getAttribute("aria-hidden")==="true") return; /* clickable, but no tab stop / role / label */
+  f.setAttribute("tabindex","0"); f.setAttribute("role","button");
   const im = $("img",f), c = $("figcaption",f);
   const cap = c ? (c.querySelector("span:last-child")||c).textContent.trim() : (im ? im.alt : "");
   f.setAttribute("aria-label", "View frame: " + cap);
@@ -750,10 +801,20 @@ if (matchMedia("(pointer: fine)").matches && !reduced){
   });
 }
 /* ---------- collage: scroll-depth parallax (figures drift, hover zoom composes) ---------- */
+$$(".collage figure").forEach(f=>{
+  const im = $("img",f); if (!im || $(".inner",f)) return;
+  const w = document.createElement("span"); w.className = "inner";
+  f.insertBefore(w,im); w.appendChild(im);
+});
 if (hasGsap && !reduced){
   gsap.fromTo(".collage .c-small", {y:50}, {y:-50, ease:"none",
     scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
   gsap.fromTo(".collage .c-big", {y:-40}, {y:40, ease:"none",
+    scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
+  /* inner-image drift inside each gate (counter-parallax depth) */
+  gsap.fromTo(".collage .c-small img", {yPercent:-5}, {yPercent:5, ease:"none",
+    scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
+  gsap.fromTo(".collage .c-big img", {yPercent:5}, {yPercent:-5, ease:"none",
     scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
 }
 
@@ -778,6 +839,13 @@ if (CONFIG.instagram){
   const ig = $("#instaLink"); ig.href = CONFIG.instagram; ig.hidden = false; ig.target="_blank"; ig.rel="noopener";
 }
 $("#year").textContent = new Date().getFullYear();
+/* live on-set clock — Okhla time, the society's heartbeat */
+const clocks = [$("#onSetClock"), $("#onSetClock2")].filter(Boolean);
+if (clocks.length){
+  const fmt = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const tickClock = ()=>{ if (document.hidden) return; const s = "ON SET "+fmt.format(new Date())+" IST"; clocks.forEach(c=>c.textContent=s); };
+  tickClock(); setInterval(tickClock, 1000);
+}
 onScroll();
 
 /* a note for the curious who open the console */
