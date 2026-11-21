@@ -94,6 +94,16 @@ body.daylight .burger span{background:var(--cream)}
 .hero{position:relative;height:178vh;min-height:980px;background:var(--black)}
 .hero-media{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;z-index:0}
 .hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:center;will-change:transform;backface-visibility:hidden}
+#heroVideoB{opacity:0}
+.intro-curtain{position:fixed;inset:0;background:var(--black);z-index:200;pointer-events:none}
+body.calm .intro-curtain{display:none}
+.roll-peek{position:fixed;top:0;left:0;width:min(24vw,300px);aspect-ratio:4/3;z-index:90;pointer-events:none;
+  opacity:0;overflow:hidden;border:1px solid var(--line-strong);background:var(--coal);
+  transition:opacity .25s;will-change:transform}
+.roll-peek.on{opacity:1}
+.roll-peek img{width:100%;height:100%;object-fit:cover;display:block}
+@media (pointer:coarse){.roll-peek{display:none}}
+.pill{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 .hero-scrim{position:absolute;inset:0;pointer-events:none;background:
   linear-gradient(to bottom,
     color-mix(in srgb,var(--black) 84%,transparent) 0%,

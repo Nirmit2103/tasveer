@@ -156,63 +156,71 @@ const STILLS = [
   ["assets/drive/still3.jpg","a canopy of lights, okhla"],
 ];
 $("#heroStills").innerHTML = STILLS.map(s=>`<figure data-cursor="VIEW"><div class="imgwrap"><img src="${esc(s[0])}" alt="${esc(s[1])}" loading="lazy"></div><figcaption class="mono">${esc(s[1])}</figcaption></figure>`).join("");
-/* hero video: scroll-driven, not autoplay. Scroll advances the footage
-   AND zooms out (1.28 → 1.0), scrubbed in sync with the wordmark. */
-let heroP = 0, heroSeekT = -1;
-function scrubHeroVideo(p){
-  if (!heroVideo) return;
-  if (reduced || !motionOn){ heroVideo.style.transform = "scale(1)"; return; }
-  const d = heroVideo.duration;
-  if (d && isFinite(d)){
-    const t = p * Math.max(0, d - 0.08);
-    if (Math.abs(heroSeekT - t) > 0.04){ heroSeekT = t; heroVideo.currentTime = t; }
+/* hero: living footage + scroll choreography (hybrid).
+   Shot A (canopy aerial) plays and crossfades to Shot B (stage/crowd)
+   mid-hero; the camera zooms out 1.18→1.0 while the wordmark counter-
+   zooms from fully-fitted at rest to monumental bleed — so TASVEER is
+   always readable as a whole on load, then pushes past the edges. */
+const heroVideoB = $("#heroVideoB");
+const heroWord = $(".hero-word");
+let heroP = 0, wordFit = 1;
+function measureWord(){
+  if (heroWord) wordFit = Math.min(1, (innerWidth * 0.9) / heroWord.offsetWidth);
+}
+function heroChoreo(p){
+  const s = (1.18 - 0.18 * p).toFixed(4);
+  const t = `translateY(${(-3 * p).toFixed(2)}vh) scale(${s})`;
+  if (heroVideo) heroVideo.style.transform = t;
+  if (heroVideoB){
+    heroVideoB.style.transform = t;
+    const f = Math.min(1, Math.max(0, (p - 0.38) / 0.30));
+    heroVideoB.style.opacity = (f * f * (3 - 2 * f)).toFixed(3);
   }
-  heroVideo.style.transform = `scale(${(1.28 - 0.28 * p).toFixed(4)})`;
+  if (heroWordWrap){
+    const ws = wordFit + (1.06 - wordFit) * p;
+    const y = window.scrollY * 0.12 - (1 - p) * 0.09 * innerHeight;
+    heroWordWrap.style.transform = `translateY(${y.toFixed(1)}px) scale(${ws.toFixed(4)})`;
+  }
 }
 function heroVideoState(){
-  if (heroVideo) heroVideo.pause();
-  scrubHeroVideo(heroP);
-  scrubInterludeVideo(interludeP);
+  const play = motionOn && !reduced;
+  if (heroVideo) play ? heroVideo.play().catch(()=>{}) : heroVideo.pause();
+  if (heroVideoB) (play && !touchDevice) ? heroVideoB.play().catch(()=>{}) : heroVideoB.pause();
+  if (!play){
+    if (heroVideo) heroVideo.style.transform = "scale(1)";
+    if (heroVideoB){ heroVideoB.style.transform = "scale(1)"; heroVideoB.style.opacity = 0; }
+    if (heroWordWrap) heroWordWrap.style.transform = `translateY(${(-0.09 * innerHeight).toFixed(1)}px) scale(${wordFit.toFixed(4)})`;
+  } else heroChoreo(heroP);
+  syncInterlude();
 }
-if (heroVideo){
-  heroVideo.removeAttribute("autoplay");
-  heroVideo.pause();
-  const initHero = ()=>scrubHeroVideo(heroP);
-  if (heroVideo.readyState >= 1) initHero();
-  else heroVideo.addEventListener("loadedmetadata", initHero, {once:true});
-}
-/* interlude video: same scroll-scrub + zoom-out treatment */
+measureWord();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ measureWord(); heroChoreo(heroP); });
+addEventListener("resize", ()=>{ measureWord(); heroChoreo(heroP); }, {passive:true});
+/* interlude: living footage, plays on screen, scroll zoom-out */
 const interludeVideo = $("#interludeVideo");
-let interludeP = 0, interSeekT = -1;
-function scrubInterludeVideo(p){
+let interludeVisible = false, interludeP = 0;
+function syncInterlude(){
   if (!interludeVideo) return;
-  if (reduced || !motionOn){ interludeVideo.style.transform = "scale(1)"; return; }
-  const d = interludeVideo.duration;
-  if (d && isFinite(d)){
-    const t = p * Math.max(0, d - 0.08);
-    if (Math.abs(interSeekT - t) > 0.04){ interSeekT = t; interludeVideo.currentTime = t; }
-  }
-  interludeVideo.style.transform = `scale(${(1.22 - 0.22 * p).toFixed(4)})`;
+  if (reduced || !motionOn || !interludeVisible) interludeVideo.pause();
+  else interludeVideo.play().catch(()=>{});
 }
-if (interludeVideo){
-  interludeVideo.pause();
-  const initInt = ()=>scrubInterludeVideo(interludeP);
-  if (interludeVideo.readyState >= 1) initInt();
-  else interludeVideo.addEventListener("loadedmetadata", initInt, {once:true});
+if (interludeVideo && "IntersectionObserver" in window){
+  new IntersectionObserver(es=>{
+    interludeVisible = es[0].isIntersecting;
+    syncInterlude();
+  }, {threshold:.15}).observe($(".interlude"));
 }
 if (hasGsap && !reduced){
   ScrollTrigger.create({
-    trigger:".hero", start:"top top", end:"bottom top", scrub:true,
-    onUpdate:self=>{
-      heroP = self.progress;
-      const y = self.scroll()*0.12, sc = 1 + self.progress*0.06;
-      heroWordWrap.style.transform = `translateY(${y}px) scale(${sc})`;
-      scrubHeroVideo(self.progress);
-    }
+    trigger:".hero", start:"top top", end:"bottom bottom", scrub:true,
+    onUpdate:self=>{ heroP = self.progress; heroChoreo(self.progress); }
   });
   ScrollTrigger.create({
-    trigger:".interlude", start:"top bottom", end:"bottom top", scrub:true,
-    onUpdate:self=>{ interludeP = self.progress; scrubInterludeVideo(self.progress); }
+    trigger:".interlude", start:"top top", end:"bottom bottom", scrub:true,
+    onUpdate:self=>{
+      interludeP = self.progress;
+      if (motionOn && interludeVideo) interludeVideo.style.transform = `scale(${(1.15 - 0.15 * self.progress).toFixed(4)})`;
+    }
   });
   $$(".hero-stills figure").forEach((f,i)=>{
     gsap.fromTo(f, {y:70+i*36}, {y:-36-i*18, ease:"none",
@@ -381,6 +389,62 @@ if (matchMedia("(pointer: fine)").matches && !reduced && hasGsap){
     const t = e.target.closest("[data-cursor],a,button");
     if (t){ label.textContent = t.dataset.cursor || (t.classList.contains("member") ? "FLIP" : "GO"); label.style.display="block"; }
     else label.style.display="none";
+  });
+}
+
+/* ---------- polish: velocity marquees, intro, roll peek, magnetic pills ---------- */
+/* marquees speed up with scroll velocity, decay back (Drive signature) */
+if (hasGsap && !reduced){
+  const tracks = $$(".marquee-track");
+  let vel = 0, lastY = window.scrollY;
+  gsap.ticker.add(()=>{
+    const y = window.scrollY, dv = y - lastY; lastY = y;
+    vel += (dv - vel) * 0.12;
+    const rate = motionOn ? Math.min(4, 1 + Math.abs(vel) * 0.06) : 1;
+    tracks.forEach(tr=>{
+      const an = tr.getAnimations ? tr.getAnimations()[0] : null;
+      if (an && an.playbackRate !== rate) an.playbackRate = rate;
+    });
+  });
+}
+/* intro curtain: one cinematic lift, then gone */
+const curtain = $("#introCurtain");
+if (curtain){
+  if (reduced || !motionOn || !hasGsap) curtain.remove();
+  else {
+    gsap.to(curtain, {yPercent:-100, duration:.9, delay:.2, ease:"power4.inOut", onComplete:()=>curtain.remove()});
+    setTimeout(()=>{ if (curtain.parentNode) curtain.remove(); }, 2600);
+  }
+}
+/* roll peek: first frame of each beat floats beside the cursor on hover */
+const peek = $("#rollPeek");
+if (peek && matchMedia("(pointer: fine)").matches && !reduced){
+  const pimg = $("img", peek);
+  ROLL.forEach(b=>{ const im = new Image(); im.src = b.frames[0][0]; });
+  let px = innerWidth/2, py = innerHeight/2, tx = px, ty = py;
+  $$(".beat-row").forEach((row,i)=>{
+    row.addEventListener("mouseenter", ()=>{ pimg.src = ROLL[i].frames[0][0]; peek.classList.add("on"); });
+    row.addEventListener("mouseleave", ()=>peek.classList.remove("on"));
+  });
+  addEventListener("mousemove", e=>{
+    tx = Math.min(e.clientX + 150, innerWidth - 170);
+    ty = Math.max(120, Math.min(e.clientY - 30, innerHeight - 120));
+  }, {passive:true});
+  if (hasGsap) gsap.ticker.add(()=>{
+    px += (tx - px) * .14; py += (ty - py) * .14;
+    peek.style.transform = `translate3d(${px.toFixed(1)}px,${py.toFixed(1)}px,0) translate(-50%,-50%)`;
+  });
+}
+/* magnetic pills: subtle pull toward the cursor */
+if (matchMedia("(pointer: fine)").matches && !reduced){
+  $$(".pill").forEach(p=>{
+    p.addEventListener("mousemove", e=>{
+      const r = p.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width/2)) * 0.18;
+      const dy = (e.clientY - (r.top + r.height/2)) * 0.3;
+      p.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;
+    });
+    p.addEventListener("mouseleave", ()=>{ p.style.transform = ""; });
   });
 }
 
