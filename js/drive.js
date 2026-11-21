@@ -468,6 +468,22 @@ if (matchMedia("(pointer: fine)").matches && !reduced){
   });
 }
 
+/* ---------- section titles: film-gate wipe (composes with parent fade) ---------- */
+$$(".section-title").forEach(el=>{
+  if (!hasGsap || reduced) return;
+  ScrollTrigger.create({trigger:el, start:"top 88%", once:true,
+    onEnter:()=>gsap.fromTo(el, {clipPath:"inset(0 100% 0 0)"}, {clipPath:"inset(0 0% 0 0)", duration:1.1, ease:"power4.inOut"}),
+    onRefresh:self=>{ if (self.progress>0) gsap.set(el, {clearProps:"clipPath"}); }});
+});
+/* ---------- footer statement develops like a darkroom print ---------- */
+const fstate = $(".footer-statement");
+if (fstate && hasGsap && !reduced){
+  fstate.classList.add("undeveloped");
+  ScrollTrigger.create({trigger:fstate, start:"top 82%", once:true,
+    onEnter:()=>fstate.classList.remove("undeveloped"),
+    onRefresh:self=>{ if (self.progress>0) fstate.classList.remove("undeveloped"); }});
+}
+
 /* ---------- scene pathfinder: highlight the current section ---------- */
 const pf = $("#pathfinder");
 if (pf && "IntersectionObserver" in window){
