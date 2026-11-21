@@ -121,6 +121,12 @@ function buildMarquee(el, itemsHTML, {invert=false, secPerItem=6, pauseHover=fal
   const track = document.createElement("div");
   track.className = "marquee-track" + (invert ? " inverted" : "") + (pauseHover ? " pause-hover" : "");
   track.innerHTML = itemsHTML + itemsHTML; /* two copies → seamless -50% loop */
+  const nodes=[...track.children], half=nodes.length/2;
+  nodes.slice(half).forEach(n=>{
+    n.setAttribute("aria-hidden","true");
+    if (n.matches("[data-lb],a,button,[tabindex]")) n.setAttribute("tabindex","-1");
+    $$("[data-lb],a,button,[tabindex]",n).forEach(x=>x.setAttribute("tabindex","-1"));
+  });
   track.style.setProperty("--dur", `${Math.max(20, secPerItem * itemsHTML.split("data-item").length - 1)}s`);
   el.appendChild(track);
   return track;
@@ -146,7 +152,7 @@ const bandImgs = [
   [A+"photo086.webp","yellow"],[A+"photo083.webp","spotlight"],
 ];
 const tileCls = ["t-a","t-b","t-c"];
-const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
+const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item data-cursor="VIEW"><img src="${esc(im[0])}" alt="" loading="lazy" decoding="async"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
 buildMarquee($("#photoBand"), bandHTML, {invert:true, secPerItem:4, pauseHover:true});
 
 /* ---------- hero: cinema video + parallax wordmark + stills ---------- */
@@ -157,7 +163,7 @@ const STILLS = [
   ["assets/drive/still2.jpg","the verse, amber light"],
   ["assets/drive/still3.jpg","a canopy of lights, okhla"],
 ];
-$("#heroStills").innerHTML = STILLS.map(s=>`<figure data-cursor="VIEW"><div class="imgwrap"><img src="${esc(s[0])}" alt="${esc(s[1])}" loading="lazy"></div><figcaption class="mono">${esc(s[1])}</figcaption></figure>`).join("");
+$("#heroStills").innerHTML = STILLS.map(s=>`<figure data-cursor="VIEW"><div class="imgwrap"><img src="${esc(s[0])}" alt="${esc(s[1])}" loading="lazy" decoding="async"></div><figcaption class="mono">${esc(s[1])}</figcaption></figure>`).join("");
 /* hero: living footage + scroll choreography (hybrid).
    Shot A (canopy aerial) plays and crossfades to Shot B (stage/crowd)
    mid-hero; the camera zooms out 1.18→1.0 while the wordmark counter-
@@ -215,7 +221,7 @@ if (interludeVideo && "IntersectionObserver" in window){
 if (hasGsap && !reduced){
   ScrollTrigger.create({
     trigger:".hero", start:"top top", end:"bottom bottom", scrub:true,
-    onUpdate:self=>{ heroP = self.progress; heroChoreo(self.progress); }
+    onUpdate:self=>{ heroP = self.progress; if (motionOn) heroChoreo(self.progress); }
   });
   ScrollTrigger.create({
     trigger:".interlude", start:"top top", end:"bottom bottom", scrub:true,
@@ -265,6 +271,7 @@ ROLL.forEach((beat,i)=>{
   const panelId = `beat-panel-${i}`;
   sec.innerHTML = `
     <button class="beat-row" aria-expanded="false" aria-controls="${panelId}" data-cursor="OPEN">
+      <span class="beat-idx mono">${String(i+1).padStart(2,"0")}</span>
       <span class="beat-name">${esc(beat.name)}</span>
       <span class="beat-code">${esc(beat.code)}</span>
       <span class="beat-count">${beat.count} FRAMES</span>
@@ -274,7 +281,7 @@ ROLL.forEach((beat,i)=>{
       <div class="beat-panel-inner">
         <p class="beat-note">${esc(beat.note)}</p>
         <div class="beat-frames">
-          ${beat.frames.map(f=>`<figure class="beat-frame" data-cursor="VIEW"><div class="imgwrap"><img src="${esc(f[0])}" alt="" loading="lazy"></div><figcaption class="mono">${esc(f[1])}</figcaption></figure>`).join("")}
+          ${beat.frames.map(f=>`<figure class="beat-frame" data-cursor="VIEW"><div class="imgwrap"><img src="${esc(f[0])}" alt="" loading="lazy" decoding="async"></div><figcaption class="mono">${esc(f[1])}</figcaption></figure>`).join("")}
         </div>
       </div>
     </div>`;
@@ -303,17 +310,20 @@ TEAM.forEach(t=>{
     ? `<img class="main" src="assets/team/${esc(t.img)}" alt="Portrait of ${esc(t.name)}" loading="lazy">`
     : `<span class="pending mono">◉<br>AWAITING<br>EXPOSURE</span>`;
   const child = t.child
-    ? `<img class="child" src="assets/team/${esc(t.child)}" alt="" aria-hidden="true" loading="lazy"><span class="tag">FRAME 00 · ${esc(t.name)} · BEFORE TASVEER</span>`
-    : "";
+    ? `<img class="child" src="assets/team/${esc(t.child)}" alt="" aria-hidden="true" loading="lazy" decoding="async"><span class="tag">FRAME 00 · ${esc(t.name)} · BEFORE TASVEER</span>`
+    : (t.back && t.back.type==="quote"
+      ? `<span class="quote-back" aria-hidden="true"><span class="quote-text">\u201C${esc(t.back.text)}\u201D</span><span class="tag mono">${esc(t.back.tag)}</span></span>`
+      : "");
   b.innerHTML = `<span class="imgwrap">${main}${child}</span>
     <span class="member-meta"><span class="member-name">${esc(t.name)}</span><span class="member-role">${esc(t.role)}</span></span>`;
-  b.setAttribute("aria-label", `${t.name}, ${t.role}${t.child ? ". Activate to see their childhood photo." : ""}`);
-  if (t.child){
+  b.setAttribute("aria-label", `${t.name}, ${t.role}${t.child ? ". Activate to see their childhood photo." : (t.back ? ". Activate to read their note." : "")}`);
+  if (t.child || (t.back && t.back.type==="quote")){
     b.addEventListener("click", ()=>{
       const flipped = b.classList.toggle("flipped");
       b.setAttribute("aria-pressed", String(flipped));
-      $(".child", b).setAttribute("aria-hidden", String(!flipped));
-      $(".main", b).setAttribute("aria-hidden", String(flipped));
+      const backEl = $(".child", b) || $(".quote-back", b);
+      if (backEl) backEl.setAttribute("aria-hidden", String(!flipped));
+      const mainEl = $(".main", b); if (mainEl) mainEl.setAttribute("aria-hidden", String(flipped));
     });
   } else {
     b.addEventListener("click", ()=>toast(t.img ? "NO CHILDHOOD FRAME ON FILE — YET." : `${t.name.toUpperCase()} — FRAME PENDING. SEND US ONE.`));
@@ -418,7 +428,8 @@ if (hasGsap && !reduced){
 /* intro: film-leader preloader — frame counter, then aperture iris wipe */
 const curtain = $("#introCurtain");
 if (curtain){
-  const kill = ()=>{ document.body.style.overflow = ""; if (curtain.parentNode) curtain.remove(); };
+  let killed = false;
+  const kill = ()=>{ if (killed) return; killed = true; document.body.style.overflow = ""; if (curtain.parentNode) curtain.remove(); if (!reduced && motionOn) decodeText($(".hero-kicker")); };
   if (reduced || !motionOn || !hasGsap) kill();
   else {
     document.body.style.overflow = "hidden";
@@ -466,6 +477,248 @@ if (matchMedia("(pointer: fine)").matches && !reduced){
     });
     p.addEventListener("mouseleave", ()=>{ p.style.transform = ""; });
   });
+}
+
+/* ---------- the contact sheet: pull-the-film horizontal strip ----------
+   Film spacers let every frame sit centered in the gate; mouse drag carries
+   momentum and settles with a snap + lock flash; touch rides native scroll. */
+const SHEET = [
+  ["photo017.webp","headliner, green light"],["photo007.webp","split light, front rail"],
+  ["photo077.webp","the diya, held breath"],["photo045.webp","the full house"],
+  ["photo075.webp","mid-flip, red backdrop"],["photo053.webp","the talk, esya"],
+  ["photo005.webp","peak action"],["photo089.webp","chiaroscuro"],
+  ["photo062.webp","the pool final"],["photo081.webp","the send-off"],
+  ["photo026.webp","battle of bands"],["photo086.webp","yellow, studio"],
+];
+const sheetTrack = $("#sheetTrack");
+let sheetSuppressUntil = 0;
+if (sheetTrack){
+  sheetTrack.innerHTML = SHEET.map((f,i)=>`<figure class="sheet-frame" data-cursor="VIEW"><div class="imgwrap"><img src="${esc(A+f[0])}" alt="${esc(f[1])}" loading="lazy" decoding="async" draggable="false"></div><figcaption class="mono"><span>FR ${String(i+1).padStart(2,"0")}</span><span>${esc(f[1])}</span></figcaption></figure>`).join("");
+  const vp = $("#sheetViewport"), gc = $("#gateCount"), gate = $(".sheet-gate"), live = $("#sheetLive");
+  const frames = $$(".sheet-frame", sheetTrack);
+  let lastBest = -1, lastFlashed = -1, flashT = null;
+  const nearest = ()=>{
+    const center = vp.scrollLeft + vp.clientWidth/2;
+    let best=0, bd=Infinity;
+    frames.forEach((f,i)=>{ const c=f.offsetLeft+f.offsetWidth/2, d=Math.abs(c-center); if(d<bd){bd=d;best=i;} });
+    return best;
+  };
+  const upd = (flash)=>{
+    const best = nearest();
+    if (gc) gc.textContent = `FR ${String(best+1).padStart(2,"0")} / ${String(frames.length).padStart(2,"0")}`;
+    lastBest = best;
+    if (flash && best !== lastFlashed){
+      lastFlashed = best;
+      if (live) live.textContent = `Frame ${best+1} of ${frames.length}`;
+      if (!reduced && gate){
+        gate.classList.remove("lock"); void gate.offsetWidth; gate.classList.add("lock");
+        if (gc){ gc.classList.remove("tick"); void gc.offsetWidth; gc.classList.add("tick"); }
+      }
+    }
+  };
+  const snapNearest = (smooth)=>{
+    const f = frames[nearest()];
+    vp.scrollTo({left: f.offsetLeft + f.offsetWidth/2 - vp.clientWidth/2, behavior: (smooth && !reduced && motionOn) ? "smooth" : "auto"});
+  };
+  /* leading/trailing film spacers: any frame can reach the gate */
+  const layoutSheet = (keepIdx)=>{
+    const fw = frames[0].offsetWidth;
+    const marginPx = parseFloat(getComputedStyle($(".sheet-head")).paddingLeft) || 0;
+    const pad = Math.max(marginPx, vp.clientWidth/2 - fw/2);
+    sheetTrack.style.paddingLeft = pad+"px"; sheetTrack.style.paddingRight = pad+"px";
+    if (keepIdx >= 0){ const f = frames[keepIdx]; vp.scrollLeft = f.offsetLeft + f.offsetWidth/2 - vp.clientWidth/2; }
+    else vp.scrollLeft = 0;
+    upd(false);
+  };
+  layoutSheet(-1);
+  let rzT = null;
+  addEventListener("resize", ()=>{ clearTimeout(rzT); rzT = setTimeout(()=>layoutSheet(lastBest), 150); }, {passive:true});
+  vp.addEventListener("scroll", ()=>{ upd(false); clearTimeout(flashT); flashT = setTimeout(()=>upd(true), 140); }, {passive:true});
+  /* mouse drag with momentum — capture only once a real drag begins,
+     so a plain click still targets its figure (lightbox) */
+  let down=false, sx=0, sl=0, lastX=0, lastT=0, vx=0, moved=0, momRaf=null, captured=false, pid=null;
+  const stopMom = ()=>{ if (momRaf){ cancelAnimationFrame(momRaf); momRaf=null; } };
+  const momentum = ()=>{
+    let last = performance.now();
+    const step = (now)=>{
+      const dt = Math.min(48, now-last); last = now;
+      vp.scrollLeft -= vx*dt;
+      vx *= Math.pow(0.94, dt/16.7);
+      if (vp.scrollLeft<=0 || vp.scrollLeft>=vp.scrollWidth-vp.clientWidth) vx=0;
+      if (Math.abs(vx)>0.04){ momRaf=requestAnimationFrame(step); }
+      else { momRaf=null; vp.classList.remove("dragging"); snapNearest(true); }
+    };
+    momRaf = requestAnimationFrame(step);
+  };
+  vp.addEventListener("pointerdown", e=>{
+    if (e.pointerType!=="mouse") return;
+    stopMom(); down=true; captured=false; pid=e.pointerId;
+    sx=lastX=e.clientX; sl=vp.scrollLeft; lastT=performance.now(); vx=0; moved=0;
+    vp.classList.add("dragging");
+  });
+  vp.addEventListener("pointermove", e=>{
+    if (!down) return;
+    const now = performance.now(), dx = e.clientX-lastX, dt = Math.max(1, now-lastT);
+    vp.scrollLeft = sl-(e.clientX-sx);
+    moved += Math.abs(dx);
+    if (!captured && moved>6){ try{ vp.setPointerCapture(pid); }catch(_){} captured=true; }
+    vx = vx*0.7 + (dx/dt)*0.3;
+    lastX = e.clientX; lastT = now;
+  });
+  const endDrag = ()=>{
+    if (!down) return;
+    down=false;
+    if (moved>6) sheetSuppressUntil = performance.now()+400;
+    if (moved>6 && Math.abs(vx)>0.08 && !reduced && motionOn){ momentum(); }
+    else { vp.classList.remove("dragging"); if (moved>6) snapNearest(true); }
+  };
+  vp.addEventListener("pointerup", endDrag); vp.addEventListener("pointercancel", endDrag);
+  addEventListener("pointerup", ()=>{ if (down && !captured) endDrag(); });
+  addEventListener("pointercancel", ()=>{ if (down && !captured) endDrag(); });
+  vp.addEventListener("wheel", ()=>{ const wasMom = !!momRaf; stopMom(); if (wasMom && !down){ vp.classList.remove("dragging"); snapNearest(true); } }, {passive:true});
+  vp.addEventListener("keydown", e=>{
+    const beh = (reduced || !motionOn) ? "auto" : "smooth";
+    if (e.key==="ArrowRight"){ vp.scrollBy({left:vp.clientWidth*0.6, behavior:beh}); e.preventDefault(); }
+    if (e.key==="ArrowLeft"){ vp.scrollBy({left:-vp.clientWidth*0.6, behavior:beh}); e.preventDefault(); }
+    if (e.key==="Home"){ vp.scrollTo({left:0, behavior:beh}); e.preventDefault(); }
+    if (e.key==="End"){ vp.scrollTo({left:vp.scrollWidth, behavior:beh}); e.preventDefault(); }
+  });
+}
+
+/* ---------- lightbox: every VIEW frame opens full-screen ---------- */
+const lb = $("#lightbox"), lbImg = $("#lbImg"), lbWrap = $("#lbWrap"),
+      lbCount = $("#lbCount"), lbText = $("#lbText"), lbHint = $("#lbHint"),
+      lbClose = $("#lbClose"), lbPrev = $("#lbPrev"), lbNext = $("#lbNext");
+let lbItems = [], lbCur = 0, lbOpener = null, lbSwT = null, lbFocusT = null;
+if (lb) lb.inert = true;
+const pad2 = n => String(n).padStart(2,"0");
+function lbGroupFor(fig){
+  if (fig.closest("#photoBand")){
+    const src = $("img",fig).getAttribute("src");
+    const items = bandImgs.map(b=>({src:b[0], cap:b[1], alt:b[1]}));
+    return {items, idx: Math.max(0, items.findIndex(i=>i.src===src))};
+  }
+  if (fig.closest(".sheet-track")){
+    const figs = $$(".sheet-frame", sheetTrack);
+    return {items: SHEET.map(s=>({src:A+s[0], cap:s[1], alt:s[1]})), idx: figs.indexOf(fig)};
+  }
+  if (fig.closest(".hero-stills")){
+    const figs = $$(".hero-stills figure");
+    return {items: STILLS.map(s=>({src:s[0], cap:s[1], alt:s[1]})), idx: figs.indexOf(fig)};
+  }
+  const cont = fig.closest(".beat-frames, .collage");
+  if (cont){
+    const figs = $$("figure", cont);
+    const items = figs.map(f=>{ const im=$("img",f), c=$("figcaption",f);
+      return {src: im.getAttribute("src"), cap: c ? c.textContent.trim() : (im.alt||""), alt: im.alt||""}; });
+    return {items, idx: figs.indexOf(fig)};
+  }
+  return null;
+}
+function lbPreload(i){
+  [ (i+1)%lbItems.length, (i-1+lbItems.length)%lbItems.length ].forEach(j=>{
+    const im = new Image(); im.src = lbItems[j].src;
+  });
+}
+function lbShow(i, instant){
+  lbCur = i;
+  const it = lbItems[i];
+  const apply = ()=>{
+    lbImg.src = it.src; lbImg.alt = it.alt || it.cap;
+    lbText.textContent = it.cap;
+    lbCount.textContent = `FR ${pad2(i+1)} / ${pad2(lbItems.length)}`;
+    lbPreload(i);
+  };
+  if (instant || reduced || !motionOn){ clearTimeout(lbSwT); lbWrap.classList.remove("switching"); apply(); return; }
+  lbWrap.classList.add("switching");
+  clearTimeout(lbSwT);
+  lbSwT = setTimeout(()=>{ apply(); lbWrap.classList.remove("switching"); }, 170);
+}
+function lbOpen(items, idx, opener){
+  if (!items.length || idx<0) return;
+  lbItems = items; lbOpener = opener;
+  lbShow(idx, true);
+  lb.inert = false;
+  lb.classList.add("open"); lb.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden"; if (lenis) lenis.stop();
+  lbHint.textContent = matchMedia("(pointer: coarse)").matches
+    ? "SWIPE TO ADVANCE · TAP OUTSIDE TO CLOSE"
+    : "← → TO ADVANCE · ESC TO CLOSE";
+  clearTimeout(lbFocusT); lbFocusT = setTimeout(()=>lbClose.focus(), 60);
+}
+function lbCloseFn(){
+  lb.classList.remove("open");
+  document.body.style.overflow = ""; if (lenis) lenis.start();
+  clearTimeout(lbSwT); clearTimeout(lbFocusT); lbWrap.classList.remove("switching");
+  if (lbOpener) lbOpener.focus({preventScroll:true});
+  lb.setAttribute("aria-hidden","true");
+  lb.inert = true;
+}
+function lbActivate(fig){
+  if (performance.now() < sheetSuppressUntil && fig.closest(".sheet-track")) return;
+  const g = lbGroupFor(fig);
+  if (g) lbOpen(g.items, g.idx, fig);
+}
+/* mark every viewable frame as a button */
+$$(".hero-stills figure, .collage figure, .beat-frames figure, .sheet-frame, #photoBand .photo-tile").forEach(f=>{
+  if (f.getAttribute("aria-hidden")==="true") return;
+  f.setAttribute("data-lb",""); f.setAttribute("tabindex","0"); f.setAttribute("role","button");
+  const im = $("img",f), c = $("figcaption",f);
+  const cap = c ? (c.querySelector("span:last-child")||c).textContent.trim() : (im ? im.alt : "");
+  f.setAttribute("aria-label", "View frame: " + cap);
+});
+document.addEventListener("click", e=>{
+  const f = e.target.closest("[data-lb]");
+  if (f) lbActivate(f);
+});
+lbClose.addEventListener("click", lbCloseFn);
+lbPrev.addEventListener("click", ()=>lbShow((lbCur-1+lbItems.length)%lbItems.length));
+lbNext.addEventListener("click", ()=>lbShow((lbCur+1)%lbItems.length));
+lb.addEventListener("click", e=>{ if (e.target===lb) lbCloseFn(); });
+document.addEventListener("keydown", e=>{
+  if (lb.classList.contains("open")){
+    if (e.key==="Escape"){ lbCloseFn(); e.preventDefault(); }
+    else if (e.key==="ArrowRight"){ lbShow((lbCur+1)%lbItems.length); e.preventDefault(); }
+    else if (e.key==="ArrowLeft"){ lbShow((lbCur-1+lbItems.length)%lbItems.length); e.preventDefault(); }
+    else if (e.key==="Tab"){
+      const f = [lbClose, lbPrev, lbNext], i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      f[(e.shiftKey ? (i<=0 ? f.length-1 : i-1) : (i+1)%f.length)].focus();
+    }
+    return;
+  }
+  const f = e.target.closest && e.target.closest("[data-lb]");
+  if (f && (e.key==="Enter" || e.key===" ")){ e.preventDefault(); lbActivate(f); }
+});
+/* touch swipe inside the viewer */
+let lbTx=0, lbTy=0;
+lb.addEventListener("pointerdown", e=>{ if (e.pointerType==="touch"){ lbTx=e.clientX; lbTy=e.clientY; } }, {passive:true});
+lb.addEventListener("pointerup", e=>{
+  if (e.pointerType!=="touch") return;
+  const dx=e.clientX-lbTx, dy=e.clientY-lbTy;
+  if (Math.abs(dx)>48 && Math.abs(dx)>Math.abs(dy)) lbShow(dx<0 ? (lbCur+1)%lbItems.length : (lbCur-1+lbItems.length)%lbItems.length);
+}, {passive:true});
+
+/* ---------- micro-finish: kicker decode, interlude line reveal ---------- */
+function decodeText(el, dur=1000){
+  if (!el) return;
+  const orig = el.textContent, glyphs = "▓▒░·—/\\|0123456789ABCDEF";
+  const start = performance.now();
+  const tick = (now)=>{
+    const p = Math.min(1, (now-start)/dur);
+    const lock = Math.floor(p*orig.length);
+    el.textContent = orig.slice(0,lock) + [...orig.slice(lock)].map(c=>c===" "?" ":glyphs[(Math.random()*glyphs.length)|0]).join("");
+    if (p<1) requestAnimationFrame(tick); else el.textContent = orig;
+  };
+  requestAnimationFrame(tick);
+}
+const interludeLine = $(".interlude-line");
+if (interludeLine && hasGsap && !reduced){
+  const lines = interludeLine.innerHTML.split(/<br\s*\/?>/i);
+  interludeLine.innerHTML = lines.map(l=>`<span class="mask"><span>${l}</span></span>`).join("");
+  gsap.fromTo($$(".mask > span", interludeLine), {yPercent:105},
+    {yPercent:0, duration:1.1, stagger:.14, ease:"power4.out",
+     scrollTrigger:{trigger:interludeLine, start:"top 82%", once:true}});
 }
 
 /* ---------- section titles: film-gate wipe (composes with parent fade) ---------- */
@@ -526,3 +779,7 @@ if (CONFIG.instagram){
 }
 $("#year").textContent = new Date().getFullYear();
 onScroll();
+
+/* a note for the curious who open the console */
+console.log("%c◉ TASVEER — shot & developed in the darkroom by the webdev lead.", "color:#8B87FF;font-family:monospace;font-size:12px;padding:4px 0;");
+console.log("%cEvery event ends. The frame doesn't. → tasveer@sc.iiitd.ac.in", "color:#9A9A94;font-family:monospace;");

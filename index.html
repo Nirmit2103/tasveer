@@ -7,8 +7,18 @@
 <meta name="description" content="Tasveer is IIIT Delhi's media society. Every story is in our backyard — we shoot, film, design and archive the campus's memory.">
 <meta property="og:title" content="TASVEER — The Media Society of IIIT Delhi">
 <meta property="og:description" content="Every event ends. The frame doesn't.">
-<meta property="og:image" content="assets/og.jpg">
+<meta property="og:image" content="https://breaking-byts.github.io/tasveer/assets/og.jpg">
+<meta property="og:url" content="https://breaking-byts.github.io/tasveer/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TASVEER — The Media Society of IIIT Delhi">
+<meta name="twitter:description" content="Every event ends. The frame doesn't.">
+<meta name="twitter:image" content="https://breaking-byts.github.io/tasveer/assets/og.jpg">
 <meta name="theme-color" content="#050505">
+<link rel="canonical" href="https://breaking-byts.github.io/tasveer/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Tasveer","alternateName":"Tasveer — The Media Society of IIIT Delhi","url":"https://breaking-byts.github.io/tasveer/","email":"tasveer@sc.iiitd.ac.in","parentOrganization":{"@type":"CollegeOrUniversity","name":"IIIT Delhi"},"sameAs":["https://github.com/breaking-byts/tasveer"]}
+</script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,10 +68,10 @@
   <button class="menu-close" id="menuClose" aria-label="Close menu">✕</button>
   <nav class="menu-links">
     <a href="#top" data-goto="#top"><span class="num">01</span> THE BACKYARD</a>
-    <a href="#roll"><span class="num">02</span> THE ROLL</a>
-    <a href="#story"><span class="num">03</span> OUR STORY</a>
-    <a href="#crew"><span class="num">04</span> THE CREW</a>
-    <a href="#open-call"><span class="num">05</span> OPEN CALL</a>
+    <a href="#story" data-goto="#story"><span class="num">02</span> OUR STORY</a>
+    <a href="#roll" data-goto="#roll"><span class="num">03</span> THE ROLL</a>
+    <a href="#crew" data-goto="#crew"><span class="num">04</span> THE CREW</a>
+    <a href="#open-call" data-goto="#open-call"><span class="num">05</span> OPEN CALL</a>
   </nav>
   <div class="menu-foot mono">
     <a href="mailto:tasveer@sc.iiitd.ac.in">TASVEER@SC.IIITD.AC.IN</a>
@@ -127,12 +137,12 @@
     </div>
   </div>
   <div class="collage">
-    <figure class="c-small">
-      <img src="assets/drive/photo074.webp" alt="Black-and-white portrait of a guitarist under dramatic side light" loading="lazy">
+    <figure class="c-small" data-cursor="VIEW">
+      <img src="assets/drive/photo074.webp" alt="Black-and-white portrait of a guitarist under dramatic side light" loading="lazy" decoding="async">
       <figcaption class="mono">THE NIGHT · MONOCHROME</figcaption>
     </figure>
-    <figure class="c-big">
-      <img src="assets/drive/still1.jpg" alt="Aerial view of the fest grounds at night, a canopy of fairy lights over the crowd" loading="lazy">
+    <figure class="c-big" data-cursor="VIEW">
+      <img src="assets/drive/still1.jpg" alt="Aerial view of the fest grounds at night, a canopy of fairy lights over the crowd" loading="lazy" decoding="async">
       <figcaption class="mono">THE BACKYARD · OKHLA, FROM ABOVE</figcaption>
     </figure>
   </div>
@@ -148,6 +158,25 @@
   <div class="roll-more">
     <a class="pill" href="mailto:tasveer@sc.iiitd.ac.in?subject=Send%20me%20the%20full%20archive">FULL ARCHIVE ON REQUEST <span class="arr">→</span></a>
   </div>
+</section>
+
+<!-- 02b · the contact sheet — pull the film through the gate -->
+<section class="contact-sheet" id="contact-sheet">
+  <div class="sheet-head">
+    <h2 class="section-title">THE CONTACT SHEET</h2>
+    <span class="mono"><span class="hint-click">DRAG · TAP TO VIEW</span><span class="hint-tap">SWIPE · TAP TO VIEW</span></span>
+  </div>
+  <div class="sheet-stage">
+    <div class="sheet-viewport" id="sheetViewport" tabindex="0" role="region" aria-label="Contact sheet — scroll or drag sideways to advance frames">
+      <div class="sheet-track" id="sheetTrack"></div>
+    </div>
+    <div class="sheet-gate" aria-hidden="true">
+      <span class="gate-corner tl"></span><span class="gate-corner tr"></span><span class="gate-corner bl"></span><span class="gate-corner br"></span>
+      <span class="gate-rec mono">● REC</span>
+      <span class="gate-count mono" id="gateCount">FR 01 / 12</span>
+    </div>
+  </div>
+  <p class="sr-only" aria-live="polite" id="sheetLive"></p>
 </section>
 
 <!-- interlude — full-bleed cinema -->
@@ -259,6 +288,17 @@
     <span class="cream-copy">©<span id="year">2026</span> TASVEER</span>
   </div>
   <p class="cream-address">IIIT DELHI · OKHLA PHASE III · NEW DELHI 110020 · 28.5°N 77.2°E</p>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Frame viewer" aria-hidden="true">
+  <button class="lb-close" id="lbClose" aria-label="Close viewer">✕</button>
+  <button class="lb-prev" id="lbPrev" aria-label="Previous frame">←</button>
+  <button class="lb-next" id="lbNext" aria-label="Next frame">→</button>
+  <figure class="lb-stage">
+    <div class="lb-imgwrap" id="lbWrap"><img id="lbImg" alt="" draggable="false"></div>
+    <figcaption class="lb-cap mono"><span class="lb-count" id="lbCount"></span><span id="lbText"></span></figcaption>
+  </figure>
+  <p class="lb-hint mono" id="lbHint"></p>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
