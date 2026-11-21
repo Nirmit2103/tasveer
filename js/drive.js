@@ -391,6 +391,7 @@ if (matchMedia("(pointer: fine)").matches && !reduced && hasGsap){
     const t = e.target.closest("[data-cursor],a,button");
     if (t){ label.textContent = t.dataset.cursor || (t.classList.contains("member") ? "FLIP" : "GO"); label.style.display="block"; }
     else label.style.display="none";
+    cur.classList.toggle("view", !!t && t.dataset.cursor==="VIEW");
   });
 }
 
