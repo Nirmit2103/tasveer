@@ -484,6 +484,26 @@ if (fstate && hasGsap && !reduced){
     onRefresh:self=>{ if (self.progress>0) fstate.classList.remove("undeveloped"); }});
 }
 
+/* ---------- crew: tactile 3D tilt on the portrait (fine pointer) ---------- */
+if (matchMedia("(pointer: fine)").matches && !reduced){
+  $$(".member").forEach(m=>{
+    const w = $(".imgwrap", m); if (!w) return;
+    m.addEventListener("mousemove", e=>{
+      const r = w.getBoundingClientRect();
+      const px = (e.clientX - r.left)/r.width - 0.5, py = (e.clientY - r.top)/r.height - 0.5;
+      w.style.transform = `perspective(700px) rotateY(${(px*7).toFixed(2)}deg) rotateX(${(-py*7).toFixed(2)}deg)`;
+    });
+    m.addEventListener("mouseleave", ()=>{ w.style.transform = ""; });
+  });
+}
+/* ---------- collage: scroll-depth parallax (figures drift, hover zoom composes) ---------- */
+if (hasGsap && !reduced){
+  gsap.fromTo(".collage .c-small", {y:50}, {y:-50, ease:"none",
+    scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
+  gsap.fromTo(".collage .c-big", {y:-40}, {y:40, ease:"none",
+    scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
+}
+
 /* ---------- scene pathfinder: highlight the current section ---------- */
 const pf = $("#pathfinder");
 if (pf && "IntersectionObserver" in window){
