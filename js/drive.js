@@ -36,7 +36,7 @@ const ROLL = [
   {name:"MAADHYAM", code:"MDY", count:18, note:"The cultural fest — fire, flips, and the verse that silenced the lawn.",
    frames:[[A+"photo077.webp","the diya, held breath"],[A+"photo075.webp","mid-flip, red backdrop"],[A+"photo079.webp","the duet, purple hour"],[A+"photo019.webp","the verse nobody forgot"]]},
   {name:"CONVOCATION", code:"CNV", count:32, note:"Caps in the air, parents in the frame. We shoot the day everyone forgets to document.",
-   frames:[[A+"campus-bldg.webp","the quad, morning of"],[A+"presentation.webp","the address"],[A+"students.webp","waiting for names"],[A+"conference.webp","the full house"]]},
+   frames:[[A+"campus-bldg.webp","the quad, morning of"],[A+"photo083.webp","the address, spotlight"],[A+"students.webp","waiting for names"],[A+"photo081.webp","the send-off, confetti"]]},
   {name:"ESYA TECH FEST", code:"ESY", count:12, note:"The tech fest — talks, builds, and the demo that almost didn't boot.",
    frames:[[A+"photo053.webp","the talk, day one"],[A+"laptops.webp","hour 22, still building"],[A+"students.webp","the whiteboard argument"],[A+"library2.webp","quiet floor, loud minds"]]},
   {name:"SPORTS MEET", code:"SPT", count:26, note:"Finish lines, frozen. The sports complex is our fastest shutter speed.",
@@ -142,6 +142,8 @@ const bandImgs = [
   [A+"photo053.webp","the talk, esya"],[A+"photo062.webp","dead focus"],
   [A+"photo074.webp","monochrome"],[A+"photo075.webp","mid-flip"],[A+"photo077.webp","the diya"],
   [A+"photo078.webp","the march"],[A+"photo079.webp","purple hour"],
+  [A+"photo081.webp","confetti"],[A+"photo088.webp","red rim"],[A+"photo089.webp","chiaroscuro"],
+  [A+"photo086.webp","yellow"],[A+"photo083.webp","spotlight"],
 ];
 const tileCls = ["t-a","t-b","t-c"];
 const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");
