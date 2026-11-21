@@ -32,7 +32,7 @@ const BEATS = [
 const A = "assets/drive/";
 const ROLL = [
   {name:"ANNUAL FEST '26", code:"FST", count:24, note:"Three days, four stages, one sleep-deprived crew.",
-   frames:[[A+"photo017.webp","headliner night, green light"],[A+"photo007.webp","split light, front rail"],[A+"crowd-hands.webp","the drop, every hand up"],[A+"photo026.webp","battle of bands, red light"]]},
+   frames:[[A+"photo017.webp","headliner night, green light"],[A+"photo007.webp","split light, front rail"],[A+"photo045.webp","the full house, purple wash"],[A+"photo026.webp","battle of bands, red light"]]},
   {name:"CULTURAL NIGHT", code:"CLT", count:18, note:"The lawns after dark — fairy lights, open mic, and the long exposure nobody planned.",
    frames:[[A+"photo019.webp","the verse nobody forgot"],[A+"photo028.webp","duet, stage left"],[A+"photo014.webp","the smile, teal light"],[A+"photo020.webp","crowning moment"]]},
   {name:"CONVOCATION", code:"CNV", count:32, note:"Caps in the air, parents in the frame. We shoot the day everyone forgets to document.",
@@ -136,7 +136,8 @@ const bandImgs = [
   [A+"photo017.webp","green light"],[A+"photo026.webp","red light"],[A+"photo019.webp","the verse"],
   [A+"photo028.webp","duet"],[A+"photo020.webp","crowning"],[A+"photo007.webp","split light"],
   [A+"photo012.webp","amber"],[A+"photo014.webp","teal smile"],[A+"photo015.webp","bokeh"],
-  [A+"photo005.webp","peak action"],
+  [A+"photo005.webp","peak action"],[A+"photo034.webp","suited up"],[A+"photo038.webp","the crew, formal"],
+  [A+"photo041.webp","the couple"],[A+"photo044.webp","pink saree"],[A+"photo045.webp","purple wash"],
 ];
 const tileCls = ["t-a","t-b","t-c"];
 const bandHTML = bandImgs.map((im,i)=>`<figure class="photo-tile ${tileCls[i%3]}" data-item><img src="${esc(im[0])}" alt="" loading="lazy"><figcaption class="mono">${esc(im[1])}</figcaption></figure>`).join("");

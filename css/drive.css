@@ -164,7 +164,7 @@ body.calm .marquee-track,.marquee:hover .marquee-track.pause-hover{animation-pla
 .story{padding:12vh var(--margin) 10vh}
 .story-grid{display:grid;grid-template-columns:5fr 7fr;gap:var(--gap)}
 .story-left{display:flex;flex-direction:column;justify-content:space-between;gap:3rem;border-bottom:1px solid var(--line-strong);padding-bottom:2rem}
-.section-title{font-weight:700;font-stretch:75%;text-transform:uppercase;line-height:.95;font-size:clamp(2.6rem,6vw,5.4rem);letter-spacing:.005em}
+.section-title{font-weight:700;font-stretch:75%;text-transform:uppercase;line-height:.95;font-size:clamp(3rem,9vw,8.5rem);letter-spacing:.005em}
 .story-right{border-bottom:1px solid var(--line-strong);padding-bottom:2rem}
 .story-body{font-size:clamp(1.25rem,1.9vw,1.8rem);line-height:1.45;font-weight:400;max-width:34ch}
 .story-body + .story-body{margin-top:1.4rem;color:var(--gray)}
