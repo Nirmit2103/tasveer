@@ -277,6 +277,7 @@ revealOnEnter(".story", ".story-left > *, .story-right > *", {opacity:0, y:50}, 
 revealOnEnter(".collage", ".collage figure", {opacity:0, y:70}, {opacity:1, y:0, duration:1.1, stagger:.18, ease:"power3.out"});
 revealOnEnter(".roll-head", ".roll-head > *", {opacity:0, y:40}, {opacity:1, y:0, duration:.8, stagger:.1, ease:"power3.out"});
 revealOnEnter(".crew-head", ".crew-head > *", {opacity:0, y:40}, {opacity:1, y:0, duration:.8, stagger:.12, ease:"power3.out"});
+revealOnEnter(".all-of-us", ".aou-copy > *, .aou-frame", {opacity:0, y:50}, {opacity:1, y:0, duration:.9, stagger:.1, ease:"power3.out"});
 revealOnEnter(".open-call", ".open-call > *:not(.iso)", {opacity:0, y:50}, {opacity:1, y:0, duration:.9, stagger:.1, ease:"power3.out"});
 revealOnEnter(".footer-panel", ".footer-statement, .footer-grid, .footer-whisper", {opacity:0, y:50}, {opacity:1, y:0, duration:.9, stagger:.12, ease:"power3.out"});
 $$(".stretch").forEach(el=>{
@@ -365,6 +366,44 @@ DEPTS.forEach(([key,label],i)=>{
   crewFilters.appendChild(c);
 });
 revealOnEnter(".crew-grid", ".member", {opacity:0, y:36}, {opacity:1, y:0, duration:.7, stagger:{each:.05, from:"start"}, ease:"power3.out"});
+
+/* ---------- the lineup: one poster per person (mono -> colour, tilt, lightbox) ---------- */
+(function lineup(){
+  const L = D.LINEUP, wall = $("#lineupWall");
+  if (!L || !wall) return;
+  const p2 = n => String(n).padStart(2,"0");
+  const items = L.cards.map(([name,role,accent],i)=>({
+    name, role, accent, thumb:L.dir+"pt-"+p2(i+1)+".webp", full:L.dir+"p-"+p2(i+1)+".webp",
+    alt:`Tasveer poster: ${name}, ${role}`
+  }));
+  items.forEach((it,i)=>{
+    const li = document.createElement("li"); li.className = "li"; li.style.setProperty("--accent", it.accent);
+    li.innerHTML = `<button class="li-card" type="button" data-cursor="VIEW" aria-label="${esc(it.name)}, ${esc(it.role)}. Open poster full size.">
+      <span class="li-tape" aria-hidden="true"></span>
+      <span class="li-poster"><img src="${esc(it.thumb)}" alt="${esc(it.alt)}" width="640" height="800" loading="lazy" decoding="async"><span class="li-glare" aria-hidden="true"></span></span>
+      <span class="li-meta mono"><span><span class="no"></span> · <b>${esc(it.name)}</b></span><span>${esc(it.role)}</span></span></button>`;
+    const btn = $(".li-card", li), poster = $(".li-poster", li);
+    btn.addEventListener("click", ()=>lbOpen(items.map(x=>({src:x.full, cap:`${x.name} · ${x.role}`, alt:x.alt})), i, btn));
+    if (!touchDevice && !reduced){
+      btn.addEventListener("pointermove", e=>{
+        const r = poster.getBoundingClientRect(), x = (e.clientX-r.left)/r.width, y = (e.clientY-r.top)/r.height;
+        li.style.setProperty("--ty", ((x-.5)*14).toFixed(2)+"deg");
+        li.style.setProperty("--tx", ((.5-y)*14).toFixed(2)+"deg");
+        poster.style.setProperty("--gx", (x*100).toFixed(1)+"%"); poster.style.setProperty("--gy", (y*100).toFixed(1)+"%");
+      });
+      btn.addEventListener("pointerleave", ()=>{ li.style.setProperty("--tx","0deg"); li.style.setProperty("--ty","0deg"); });
+    }
+    wall.appendChild(li);
+  });
+  /* touch: whichever posters sit in the middle band of the screen come on in colour */
+  if (touchDevice && "IntersectionObserver" in window){
+    const io = new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle("lit", e.isIntersecting)),
+      {rootMargin:"-38% 0px -38% 0px"});
+    $$(".li", wall).forEach(li=>io.observe(li));
+  }
+  revealOnEnter("#lineup", ".li", {opacity:0, y:70, scale:.92}, {opacity:1, y:0, scale:1, duration:.85, stagger:{each:.06, from:"start"}, ease:"power3.out"});
+  revealOnEnter("#lineup", ".lineup-head > *", {opacity:0, y:36}, {opacity:1, y:0, duration:.8, stagger:.1, ease:"power3.out"});
+})();
 
 /* ---------- subscribe: honest mailto compose (no fake backend) ---------- */
 $("#subscribeForm").addEventListener("submit", e=>{
@@ -656,7 +695,7 @@ function lbGroupFor(fig){
     const figs = $$(".hero-stills figure");
     return {items: STILLS.map(s=>({src:s[0], cap:s[1], alt:s[1]})), idx: figs.indexOf(fig)};
   }
-  const cont = fig.closest(".beat-frames, .collage");
+  const cont = fig.closest(".beat-frames, .collage, .all-of-us");
   if (cont){
     const figs = $$("figure", cont);
     const items = figs.map(f=>{ const im=$("img",f), c=$("figcaption",f);
@@ -701,6 +740,7 @@ function lbCloseFn(){
   document.body.style.overflow = ""; if (lenis) lenis.start();
   clearTimeout(lbSwT); clearTimeout(lbFocusT); lbWrap.classList.remove("switching");
   if (lbOpener) lbOpener.focus({preventScroll:true});
+  if (wheelSync && lbOpener && lbOpener.id === "wheelStage") wheelSync(lbCur);
   lb.setAttribute("aria-hidden","true");
   lb.inert = true;
 }
@@ -710,7 +750,7 @@ function lbActivate(fig){
   if (g) lbOpen(g.items, g.idx, fig);
 }
 /* mark every viewable frame as a button */
-$$(".hero-stills figure, .collage figure, .beat-frames figure, .sheet-frame, #photoBand .photo-tile").forEach(f=>{
+$$(".hero-stills figure, .collage figure, .beat-frames figure, .sheet-frame, #photoBand .photo-tile, .aou-frame").forEach(f=>{
   f.setAttribute("data-lb","");
   if (f.getAttribute("aria-hidden")==="true") return; /* clickable, but no tab stop / role / label */
   f.setAttribute("tabindex","0"); f.setAttribute("role","button");
@@ -818,12 +858,188 @@ if (hasGsap && !reduced){
     scrollTrigger:{trigger:".collage", start:"top bottom", end:"bottom top", scrub:true}});
 }
 
+/* ---------- the archive: coverflow wheel (circular, drag / swipe / keys / auto-spin) ---------- */
+let wheelSync = null;
+(function archiveWheel(){
+  const W = D.WHEEL, stage = $("#wheelStage"), track = $("#wheelTrack");
+  if (!W || !stage || !track) return;
+  const N = W.frames.length, VIS = 7, ROT = matchMedia("(max-width:900px)").matches ? 54 : 60;
+  const p3 = n => String(n).padStart(3,"0");
+  const mod = (a,n) => ((a % n) + n) % n;
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  const frames = W.frames.map(([n,w,h,color,src])=>{
+    const cap = W.sources[src] || "ARCHIVE";
+    return { n, ar: clamp(w/h, .68, 1.5), color, cap,
+             thumb: W.dir+"w-"+p3(n)+".webp", full: W.dir+"wf-"+p3(n)+".webp",
+             alt: `${cap.toLowerCase()} — frame ${n} of ${N}` };
+  });
+  const probe = document.createElement("div"); probe.className = "wheel-probe"; stage.appendChild(probe);
+  const cards = frames.map((f,i)=>{
+    const el = document.createElement("figure"); el.className = "w-card";
+    el.style.setProperty("--ar", f.ar.toFixed(3)); el.style.setProperty("--bg", f.color);
+    el.dataset.i = i; el.dataset.cursor = "SPIN"; el.setAttribute("aria-hidden","true");
+    const im = new Image(); im.alt = f.alt; im.decoding = "async"; im.draggable = false;
+    el.appendChild(im); track.appendChild(el);
+    return { el, im, f, ar:f.ar, on:false, front:false, loaded:false };
+  });
+  const $count = $("#wheelCount"), $cap = $("#wheelCap"), $fill = $("#wheelFill"), $live = $("#wheelLive");
+  const $prev = $("#wheelPrev"), $next = $("#wheelNext"), $play = $("#wheelPlay"), $open = $("#wheelOpen");
+  let H = 400, pos = 0, target = 0, raf = 0, armed = false, dragging = false, userDriven = false;
+  let userPaused = false, inView = false, hovering = false, suppressUntil = 0;
+
+  function ensure(i){
+    const c = cards[mod(i,N)];
+    if (!armed || c.loaded) return;
+    c.loaded = true; c.im.src = c.f.thumb;
+  }
+  let lastActive = -1;
+  function setActive(a){
+    if (a === lastActive) return;
+    lastActive = a;
+    $count.textContent = `FR ${p3(a+1)} / ${N}`;
+    $cap.textContent = frames[a].cap;
+    $fill.style.width = ((a+1)/N*100).toFixed(2) + "%";
+    if (userDriven) $live.textContent = `Frame ${a+1} of ${N}. ${frames[a].cap}.`;
+    for (let k=-VIS-3; k<=VIS+3; k++) ensure(a+k);
+  }
+  function render(){
+    const base = Math.floor(pos);
+    const near = mod(Math.round(pos), N);
+    const arA = (()=>{ const i0 = mod(base,N), i1 = mod(base+1,N), t = pos-base; return cards[i0].ar*(1-t) + cards[i1].ar*t; })();
+    for (let i=0; i<N; i++){
+      const c = cards[i];
+      let d = mod(i - pos + N/2, N) - N/2;           // shortest signed distance on the ring
+      const ad = Math.abs(d);
+      if (ad > VIS){ if (c.on){ c.on = false; c.el.classList.remove("on"); } continue; }
+      if (!c.on){ c.on = true; c.el.classList.add("on"); }
+      const s = Math.sign(d) || 1, t = Math.min(ad,1);
+      const ownW = H * c.ar;
+      const S1 = H*arA/2 + H*.07 + ownW*.5*.5;        // first neighbour: just past the front card's edge
+      const x = ad < 1 ? s*ad*S1 : s*(S1 + (ad-1)*H*.15);
+      const z = (1-t)*40 - t*H*.95 - Math.max(ad-1,0)*H*.08;
+      const rot = -s*t*ROT;
+      c.el.style.transform = `translate3d(${x.toFixed(1)}px,0,${z.toFixed(1)}px) rotateY(${rot.toFixed(2)}deg)`;
+      c.el.style.zIndex = String(1000 - Math.round(ad*10));
+      c.el.style.opacity = ad > VIS-1 ? String(clamp(VIS-ad,0,1).toFixed(2)) : "1";
+      c.el.style.setProperty("--dim", (1 - Math.min(ad,3)*.17).toFixed(2));
+      const isFront = i === near;
+      if (isFront !== c.front){
+        c.front = isFront; c.el.classList.toggle("front", isFront);
+        c.el.setAttribute("aria-hidden", String(!isFront)); c.el.dataset.cursor = isFront ? "VIEW" : "SPIN";
+      }
+    }
+    setActive(near);
+  }
+  function tick(){
+    const diff = target - pos;
+    if (Math.abs(diff) < .002){ pos = target; raf = 0; render(); return; }
+    pos += diff * (reduced ? 1 : .13); render(); raf = requestAnimationFrame(tick);
+  }
+  function go(t){ target = t; if (!raf) raf = requestAnimationFrame(tick); }
+  function measure(){
+    H = probe.offsetHeight || 400;
+    const maxAr = Math.max(.6, stage.clientWidth*.8/H);   /* on phones the front card never fills the screen */
+    cards.forEach(c=>{ c.ar = Math.min(c.f.ar, maxAr); c.el.style.setProperty("--ar", c.ar.toFixed(3)); });
+    render();
+  }
+
+  /* drag / swipe */
+  let sx = 0, spos = 0, lastX = 0, lastT = 0, vel = 0, moved = 0, pid = null;
+  stage.addEventListener("pointerdown", e=>{
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    dragging = true; pid = e.pointerId; sx = lastX = e.clientX; spos = pos; moved = 0; vel = 0; lastT = performance.now();
+    if (raf){ cancelAnimationFrame(raf); raf = 0; } target = pos;
+  });
+  stage.addEventListener("pointermove", e=>{
+    if (!dragging || e.pointerId !== pid) return;
+    const dx = e.clientX - sx; moved = Math.max(moved, Math.abs(dx));
+    if (moved > 6 && !stage.classList.contains("dragging")){
+      stage.classList.add("dragging"); userDriven = true; try{ stage.setPointerCapture(pid); }catch(_){}
+    }
+    if (moved <= 6) return;
+    pos = spos - dx/(H*.42); target = pos; render();
+    const now = performance.now();
+    vel = .75*vel + .25*((lastX - e.clientX)/(H*.42))/Math.max(1, now-lastT);
+    lastX = e.clientX; lastT = now;
+  });
+  function endDrag(){
+    if (!dragging) return; dragging = false; stage.classList.remove("dragging");
+    if (moved > 6){ suppressUntil = performance.now() + 160; go(Math.round(pos + clamp(vel*220,-4,4))); }
+  }
+  stage.addEventListener("pointerup", endDrag); stage.addEventListener("pointercancel", endDrag);
+  stage.addEventListener("lostpointercapture", endDrag);
+
+  /* sideways scroll (trackpad / shift+wheel) — vertical scroll stays with the page */
+  let wt = 0;
+  stage.addEventListener("wheel", e=>{
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault(); e.stopPropagation(); userDriven = true;
+    if (raf){ cancelAnimationFrame(raf); raf = 0; }
+    pos += e.deltaX/(H*1.1); target = pos; render();
+    clearTimeout(wt); wt = setTimeout(()=>go(Math.round(pos)), 140);
+  }, {passive:false});
+
+  /* click: front card opens the viewer, side cards come forward */
+  function openViewer(){
+    userDriven = true;
+    lbOpen(frames.map(f=>({src:f.full, cap:f.cap, alt:f.alt})), mod(Math.round(pos),N), stage);
+  }
+  stage.addEventListener("click", e=>{
+    if (performance.now() < suppressUntil) return;
+    const el = e.target.closest(".w-card"); if (!el) return;
+    const i = +el.dataset.i; userDriven = true;
+    if (i === mod(Math.round(pos),N)) openViewer();
+    else go(Math.round(pos + (mod(i - pos + N/2, N) - N/2)));
+  });
+  stage.addEventListener("keydown", e=>{
+    if (e.key === "ArrowRight"){ e.preventDefault(); userDriven = true; go(Math.round(target)+1); }
+    else if (e.key === "ArrowLeft"){ e.preventDefault(); userDriven = true; go(Math.round(target)-1); }
+    else if (e.key === "Enter" || e.key === " "){ e.preventDefault(); openViewer(); }
+  });
+  $prev.addEventListener("click", ()=>{ userDriven = true; go(Math.round(target)-1); });
+  $next.addEventListener("click", ()=>{ userDriven = true; go(Math.round(target)+1); });
+  $open.addEventListener("click", openViewer);
+
+  /* auto-spin: only while in view, motion on, and nobody is touching it */
+  function setPlayUI(){
+    const on = !userPaused && !reduced;
+    $play.setAttribute("aria-pressed", String(on));
+    $play.setAttribute("aria-label", on ? "Pause auto-spin" : "Start auto-spin");
+    $play.firstElementChild.textContent = on ? "❙❙" : "▶";
+  }
+  if (reduced){ $play.hidden = true; }
+  $play.addEventListener("click", ()=>{ userPaused = !userPaused; setPlayUI(); });
+  stage.addEventListener("pointerenter", e=>{ if (e.pointerType === "mouse") hovering = true; });
+  stage.addEventListener("pointerleave", ()=>{ hovering = false; });
+  stage.addEventListener("focusin", ()=>{ hovering = true; });
+  stage.addEventListener("focusout", ()=>{ hovering = false; });
+  setInterval(()=>{
+    if (reduced || !motionOn || userPaused || !inView || hovering || dragging || document.hidden) return;
+    if ($("#lightbox").classList.contains("open")) return;
+    userDriven = false; go(Math.round(target)+1);
+  }, 3300);
+
+  if ("IntersectionObserver" in window){
+    new IntersectionObserver(es=>{
+      es.forEach(e=>{ inView = e.isIntersecting; });
+    }, {threshold:.35}).observe(stage);
+    new IntersectionObserver((es,ob)=>{
+      if (es.some(e=>e.isIntersecting)){ armed = true; ob.disconnect(); lastActive = -1; render(); }
+    }, {rootMargin:"700px 0px"}).observe(stage);
+  } else { armed = true; inView = true; }
+
+  wheelSync = i => { pos = target = Math.round(pos) + (mod(i - pos + N/2, N) - N/2); render(); };
+  addEventListener("resize", measure, {passive:true});
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  setPlayUI(); measure();
+})();
+
 /* ---------- scene pathfinder: highlight the current section ---------- */
 const pf = $("#pathfinder");
 if (pf && "IntersectionObserver" in window){
   const links = $$("a", pf);
   const setActive = id=>links.forEach(a=>a.classList.toggle("active", a.dataset.scene===id));
-  const secs = ["top","story","roll","crew","open-call"].map(id=>document.getElementById(id)).filter(Boolean);
+  const secs = ["top","story","roll","archive","crew","open-call"].map(id=>document.getElementById(id)).filter(Boolean);
   const io = new IntersectionObserver(es=>{
     es.forEach(e=>{ if (e.isIntersecting) setActive(e.target.id); });
   }, {rootMargin:"-45% 0px -45% 0px", threshold:0});
