@@ -7,7 +7,7 @@ frames — re-voiced for a campus media society: THE ROLL (six event beats
 that expand into photo essays), THE CREW (tap a portrait, everyone was a
 kid once), and a blue pill that keeps a secret.
 
-**Live:** https://breaking-byts.github.io/tasveer
+**Live:** https://leelanshkharbanda.github.io/tasveer
 
 Chosen and refined by a four-seat review council — art director, frontend
 engineer, first-time visitor, accessibility — to unanimous approval
