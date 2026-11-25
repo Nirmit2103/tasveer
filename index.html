@@ -43,8 +43,9 @@
   <a href="#top" data-goto="#top" data-scene="top"><span class="pf-tick"></span><span class="pf-num mono">01</span><span class="pf-label mono">BACKYARD</span></a>
   <a href="#story" data-goto="#story" data-scene="story"><span class="pf-tick"></span><span class="pf-num mono">02</span><span class="pf-label mono">STORY</span></a>
   <a href="#roll" data-goto="#roll" data-scene="roll"><span class="pf-tick"></span><span class="pf-num mono">03</span><span class="pf-label mono">THE ROLL</span></a>
-  <a href="#crew" data-goto="#crew" data-scene="crew"><span class="pf-tick"></span><span class="pf-num mono">04</span><span class="pf-label mono">CREW</span></a>
-  <a href="#open-call" data-goto="#open-call" data-scene="open-call"><span class="pf-tick"></span><span class="pf-num mono">05</span><span class="pf-label mono">OPEN CALL</span></a>
+  <a href="#archive" data-goto="#archive" data-scene="archive"><span class="pf-tick"></span><span class="pf-num mono">04</span><span class="pf-label mono">ARCHIVE</span></a>
+  <a href="#crew" data-goto="#crew" data-scene="crew"><span class="pf-tick"></span><span class="pf-num mono">05</span><span class="pf-label mono">CREW</span></a>
+  <a href="#open-call" data-goto="#open-call" data-scene="open-call"><span class="pf-tick"></span><span class="pf-num mono">06</span><span class="pf-label mono">OPEN CALL</span></a>
 </nav>
 
 <header class="nav" id="nav">
@@ -70,8 +71,9 @@
     <a href="#top" data-goto="#top"><span class="num">01</span> THE BACKYARD</a>
     <a href="#story" data-goto="#story"><span class="num">02</span> OUR STORY</a>
     <a href="#roll" data-goto="#roll"><span class="num">03</span> THE ROLL</a>
-    <a href="#crew" data-goto="#crew"><span class="num">04</span> THE CREW</a>
-    <a href="#open-call" data-goto="#open-call"><span class="num">05</span> OPEN CALL</a>
+    <a href="#archive" data-goto="#archive"><span class="num">04</span> THE ARCHIVE</a>
+    <a href="#crew" data-goto="#crew"><span class="num">05</span> THE CREW</a>
+    <a href="#open-call" data-goto="#open-call"><span class="num">06</span> OPEN CALL</a>
   </nav>
   <div class="menu-foot mono">
     <a href="mailto:tasveer@sc.iiitd.ac.in">TASVEER@SC.IIITD.AC.IN</a>
@@ -194,6 +196,30 @@
   </div>
 </section>
 
+<!-- 03c · the archive — the coverflow wheel -->
+<section class="wheel" id="archive" data-section="THE ARCHIVE">
+  <div class="wheel-head">
+    <h2 class="section-title">THE<br>ARCHIVE</h2>
+    <p><span id="wheelTotal">100</span> frames from the society's best, 2017 to now. <span class="hint-click">Drag, scroll sideways or use the arrow keys</span><span class="hint-tap">Swipe</span> to spin the wheel.</p>
+  </div>
+  <div class="wheel-stage" id="wheelStage" tabindex="0" role="region" aria-roledescription="carousel"
+       aria-label="The archive: a rotating wheel of the society's best frames. Use the left and right arrow keys to spin, Enter to open the front frame.">
+    <div class="wheel-track" id="wheelTrack"></div>
+    <div class="wheel-floor" aria-hidden="true"></div>
+  </div>
+  <div class="wheel-foot">
+    <div class="wheel-btns">
+      <button class="wheel-btn" id="wheelPrev" aria-label="Previous frame">←</button>
+      <button class="wheel-btn" id="wheelPlay" aria-label="Pause auto-spin" aria-pressed="true"><span aria-hidden="true">❙❙</span></button>
+      <button class="wheel-btn" id="wheelOpen" aria-label="Open this frame full size"><span aria-hidden="true">⤢</span></button>
+      <button class="wheel-btn" id="wheelNext" aria-label="Next frame">→</button>
+    </div>
+    <div class="wheel-meta mono"><span id="wheelCount">FR 001 / 100</span><span id="wheelCap"></span></div>
+    <div class="wheel-bar" aria-hidden="true"><span id="wheelFill"></span></div>
+  </div>
+  <p class="sr-only" aria-live="polite" id="wheelLive"></p>
+</section>
+
 <!-- giant beat marquee -->
 <div class="beat-marquee marquee" id="beatMarquee" aria-hidden="true"></div>
 
@@ -205,6 +231,38 @@
   </div>
   <div class="crew-filters" id="crewFilters" role="group" aria-label="Filter crew by department"></div>
   <div class="crew-grid" id="crewGrid"></div>
+
+  <!-- 04a · the lineup — one poster per person -->
+  <div class="lineup" id="lineup">
+    <div class="lineup-head">
+      <p class="mono lineup-kicker">ISSUE 01 · <span id="lineupTotal">16</span> POSTERS</p>
+      <h3 class="section-title lineup-title">THE<br>LINEUP.</h3>
+      <p class="lineup-body">One poster each, roles included. They sit in black and white until you point at them — then the colour comes on. <span class="hint-click">Click</span><span class="hint-tap">Tap</span> to see one full size.</p>
+    </div>
+    <ol class="lineup-wall" id="lineupWall"></ol>
+  </div>
+
+  <!-- 04b · all of us — the whole crew, one frame -->
+  <div class="all-of-us">
+    <div class="aou-copy">
+      <p class="mono aou-kicker">FR ∞ · ALL OF US</p>
+      <h3 class="section-title aou-title">ONE<br>FRAME.</h3>
+      <p class="aou-body">For once, everyone in front of the lens. Humayun's Tomb at blue hour — the crew, the light, the backyard getting bigger.</p>
+    </div>
+    <figure class="aou-frame" data-cursor="VIEW">
+      <span class="aou-gate">
+      <span class="gate-corner tl" aria-hidden="true"></span><span class="gate-corner tr" aria-hidden="true"></span>
+      <span class="gate-corner bl" aria-hidden="true"></span><span class="gate-corner br" aria-hidden="true"></span>
+      <span class="inner">
+        <img src="assets/drive/crew-group-1400.webp"
+             srcset="assets/drive/crew-group-1400.webp 1400w, assets/drive/crew-group-2000.webp 2000w"
+             sizes="(max-width:900px) 88vw, 58vw" width="2000" height="1994"
+             alt="The Tasveer crew posing together in front of Humayun's Tomb at dusk" loading="lazy" decoding="async">
+      </span>
+      </span>
+      <figcaption class="mono"><span>HUMAYUN'S TOMB · BLUE HOUR</span> <span>THE CREW · 2025–26</span></figcaption>
+    </figure>
+  </div>
 </section>
 
 <!-- 05 · open call -->
@@ -253,6 +311,7 @@
       <ul>
         <li><a href="#roll" data-goto="#roll">THE ROLL</a></li>
         <li><a href="#story" data-goto="#story">OUR STORY</a></li>
+        <li><a href="#archive" data-goto="#archive">THE ARCHIVE</a></li>
         <li><a href="#crew" data-goto="#crew">THE CREW</a></li>
         <li><a href="#open-call" data-goto="#open-call">OPEN CALL</a></li>
       </ul>
